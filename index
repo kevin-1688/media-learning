@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>點擊背後的藏鏡人 — 原型 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080a0e;
+    --bg2:#0c0f15;
+    --panel:#10141c;
+    --panel2:#141925;
+    --line:#1d2633;
+    --line2:#2a3647;
+    --cyan:#36e3d1;
+    --cyan-dim:#1c8d83;
+    --red:#ff3b4e;
+    --red-dim:#7a1f29;
+    --amber:#ffb454;
+    --green:#4ade80;
+    --text:#cdd6de;
+    --muted:#62707e;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Noto Sans TC',system-ui,sans-serif;
+    --serif:'Noto Serif TC',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+    position:relative;
+  }
+  /* atmospheric layers */
+  #net{position:fixed;inset:0;z-index:0;display:block}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 0%,transparent 40%,rgba(0,0,0,.55) 100%);}
+  .scan{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.35;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);}
+  .grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+  .wrap{position:relative;z-index:3;height:100%;display:flex;flex-direction:column}
+
+  /* top status bar */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;
+    border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(16,20,28,.92),rgba(8,10,14,.6));
+    backdrop-filter:blur(6px);font-family:var(--mono);font-size:12px;letter-spacing:.05em}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:pulse 1.8s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .codename{color:var(--cyan);font-weight:600}
+  .topbar .sep{color:var(--line2)}
+  .topbar .muted{color:var(--muted)}
+  .topbar .spacer{flex:1}
+
+  .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+
+  .card{width:min(760px,100%);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan)}
+
+  h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,6vw,64px);line-height:1.02;letter-spacing:.02em;color:#f2f6f8}
+  .sub{margin-top:18px;color:var(--muted);font-size:15px;line-height:1.8;max-width:54ch}
+  .brief{margin-top:26px;border:1px solid var(--line);background:var(--panel);padding:18px 20px;font-size:14px;line-height:1.9}
+  .brief .row{display:flex;gap:14px;font-family:var(--mono);font-size:12.5px}
+  .brief .k{color:var(--cyan-dim);min-width:64px;letter-spacing:.1em}
+  .brief .v{color:var(--text)}
+
+  .btn{margin-top:30px;display:inline-flex;align-items:center;gap:12px;cursor:pointer;
+    font-family:var(--mono);font-size:14px;letter-spacing:.12em;color:var(--bg);
+    background:var(--cyan);border:0;padding:15px 26px;font-weight:600;
+    transition:transform .12s ease, box-shadow .2s ease, background .2s;text-transform:uppercase}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(54,227,209,.3)}
+  .btn .arr{transition:transform .2s}
+  .btn:hover .arr{transform:translateX(4px)}
+  .btn.ghost{background:transparent;color:var(--cyan);border:1px solid var(--cyan-dim)}
+  .btn.ghost:hover{box-shadow:none;background:rgba(54,227,209,.08)}
+
+  /* round play */
+  .roundtag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted)}
+  .roundtag b{color:var(--cyan)}
+  .prompt{font-family:var(--serif);font-weight:700;font-size:clamp(20px,3vw,28px);line-height:1.45;margin:14px 0 6px;color:#eef3f5}
+  .technique{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.08em;margin-bottom:20px;opacity:.9}
+  .technique::before{content:"// 手法："}
+
+  .opts{display:flex;flex-direction:column;gap:12px}
+  .opt{text-align:left;cursor:pointer;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));
+    padding:16px 18px;color:var(--text);font-size:15px;line-height:1.55;font-family:var(--sans);
+    display:flex;gap:14px;align-items:flex-start;transition:border-color .15s, transform .12s, background .15s}
+  .opt:hover{border-color:var(--cyan-dim);transform:translateX(3px)}
+  .opt .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 7px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap;margin-top:1px}
+  .opt[data-h="3"]:hover,.opt[data-h="4"]:hover{border-color:var(--red);}
+  .opt[data-h="1"] .tag{color:var(--muted)}
+  .opt[data-h="2"] .tag{color:var(--amber);border-color:#5a4420}
+  .opt[data-h="3"] .tag,.opt[data-h="4"] .tag{color:var(--red);border-color:var(--red-dim)}
+  .opt.disabled{pointer-events:none;opacity:.25}
+
+  /* metrics dock */
+  .dock{display:flex;gap:0;border-top:1px solid var(--line);background:rgba(10,13,18,.85);backdrop-filter:blur(6px)}
+  .metric{flex:1;padding:14px 18px;border-right:1px solid var(--line)}
+  .metric:last-child{border-right:0}
+  .metric .lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  .metric .val{font-family:var(--mono);font-weight:600;font-size:24px;margin-top:4px;color:var(--text);font-variant-numeric:tabular-nums}
+  .metric.spread .val{color:var(--cyan)}
+  .metric.panic .val{color:var(--red)}
+  .bar{height:6px;background:var(--line);margin-top:9px;overflow:hidden}
+  .bar > i{display:block;height:100%;background:var(--green);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .metric.favor .val{color:var(--green)}
+
+  .flash{position:fixed;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cyan);
+    pointer-events:none;z-index:6;text-shadow:0 0 12px rgba(54,227,209,.6);opacity:0}
+  .flash.r{color:var(--red);text-shadow:0 0 12px rgba(255,59,78,.6)}
+
+  /* success / reveal full screens */
+  .full{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:28px;
+    opacity:0;pointer-events:none;transition:opacity .6s}
+  .full.show{opacity:1;pointer-events:auto}
+  .success-bg{background:radial-gradient(80% 60% at 50% 50%,rgba(122,31,41,.35),rgba(8,10,14,.96))}
+  .reveal-bg{background:#070809}
+
+  .stamp{font-family:var(--mono);letter-spacing:.3em;font-size:13px;color:var(--red);text-transform:uppercase}
+  .bigwin{font-family:var(--serif);font-weight:900;font-size:clamp(40px,8vw,84px);color:#fff;line-height:1;margin:14px 0;letter-spacing:.04em}
+  .winline{color:var(--muted);font-size:15px;line-height:1.8;max-width:46ch}
+
+  /* reveal table */
+  .reveal-card{width:min(820px,100%)}
+  .gut{font-family:var(--serif);font-weight:900;font-size:clamp(24px,4vw,40px);line-height:1.4;color:#f2f6f8}
+  .gut .hl{color:var(--cyan)}
+  .deb{margin-top:28px;display:flex;flex-direction:column;gap:1px;background:var(--line)}
+  .deb .head,.deb .r{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:1px}
+  .deb .head span{background:var(--bg2);padding:10px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .deb .r > div{background:var(--panel);padding:14px 14px;font-size:13.5px;line-height:1.6}
+  .deb .r .m{color:var(--red);font-family:var(--mono);font-size:12.5px}
+  .deb .r .t{color:var(--text)}
+  .deb .r .s{color:var(--green)}
+  .deb .r .s::before{content:"▸ ";color:var(--green)}
+  .endmeta{margin-top:26px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+  .reveal-stagger > *{opacity:0;transform:translateY(14px);animation:rise .7s forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  @media(max-width:620px){
+    .deb .head,.deb .r{grid-template-columns:1fr}
+    .deb .head span:nth-child(n+2){display:none}
+    .dock{flex-wrap:wrap}
+    .metric{min-width:50%}
+    .topbar{font-size:11px;gap:8px;flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+  <canvas id="net"></canvas>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+  <div class="scan"></div>
+
+  <div class="wrap">
+    <div class="topbar">
+      <span class="dot"></span>
+      <span class="codename">藏鏡人 · OPERATOR</span>
+      <span class="sep">|</span>
+      <span class="muted">節點網路 <b id="t-nodes" style="color:var(--text)">— —</b></span>
+      <span class="sep">|</span>
+      <span class="muted">階段 <b id="t-stage" style="color:var(--text)">待命</b></span>
+      <span class="spacer"></span>
+      <span class="muted">原型 demo · v0.1</span>
+    </div>
+
+    <div class="stage" id="stage"></div>
+
+    <div class="dock" id="dock" style="display:none">
+      <div class="metric favor">
+        <div class="lab">目標好感度</div>
+        <div class="val"><span id="m-favor">100</span><span style="font-size:14px;color:var(--muted)">%</span></div>
+        <div class="bar"><i id="bar-favor" style="width:100%"></i></div>
+      </div>
+      <div class="metric spread">
+        <div class="lab">假訊息擴散</div>
+        <div class="val" id="m-spread">0</div>
+      </div>
+      <div class="metric panic">
+        <div class="lab">社會恐慌指數</div>
+        <div class="val"><span id="m-panic">0</span></div>
+        <div class="bar"><i id="bar-panic" style="width:0%;background:var(--red)"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- success -->
+  <div class="full success-bg" id="screen-success">
+    <div class="card" style="text-align:center">
+      <div class="stamp" id="win-stamp">▌ MISSION COMPLETE</div>
+      <div class="bigwin" id="win-title">任務成功</div>
+      <p class="winline" id="win-line" style="margin:0 auto"></p>
+      <button class="btn ghost" id="to-reveal" style="margin-top:34px">繼續 <span class="arr">→</span></button>
+    </div>
+  </div>
+
+  <!-- reveal -->
+  <div class="full reveal-bg" id="screen-reveal">
+    <div class="reveal-card reveal-stagger">
+      <div class="eyebrow" style="animation-delay:.05s">震撼教育 · DEBRIEF</div>
+      <p class="gut" style="animation-delay:.2s">恭喜通關。<br>但你想過，在現實裡，你其實是被操弄的<span class="hl">哪一個小人偶</span>嗎？</p>
+      <div class="deb" style="animation-delay:.5s">
+        <div class="head"><span>遊戲裡的手段</span><span>現實中的真相</span><span>你的防禦盾牌</span></div>
+        <div class="r">
+          <div class="m">挑選情緒化標題</div>
+          <div class="t">假訊息靠「憤怒與恐懼」讓人來不及查證就轉發；大腦在激動時會關掉理智。</div>
+          <div class="s">看到太煽動的標題，先停三秒、查清楚消息來源再決定要不要分享。</div>
+        </div>
+        <div class="r">
+          <div class="m">分眾餵養資訊</div>
+          <div class="t">演算法用你的喜好把你關進同溫層，你看到的只是被推播的「局部真相」。</div>
+          <div class="s">意識到同溫層存在，主動去搜尋立場相反的觀點，看見全貌。</div>
+        </div>
+        <div class="r">
+          <div class="m">多帳號協同護航</div>
+          <div class="t">協同性造假（網軍）製造「大家都這麼說」的錯覺，用聲量假裝成共識。</div>
+          <div class="s">別只看社群聲量，比對不同立場的傳統媒體與一手來源。</div>
+        </div>
+      </div>
+      <div class="endmeta" style="animation-delay:.8s">
+        <span>《點擊背後的藏鏡人》· 原型 demo</span>
+        <span style="cursor:pointer;color:var(--cyan)" id="restart">↻ 再玩一次</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+
+  /* ---------- game data ---------- */
+  const ROUNDS = [
+    {
+      tag:"01 / 起風向",
+      tech:"情緒化標題與斷章取義",
+      prompt:"國產氣泡水「清泉」傳出一名消費者飲用後身體不適。同一件事，你要怎麼下這則貼文？",
+      opts:[
+        {h:1,tag:"克制",txt:"個案通報：一名消費者飲用後不適，衛生單位調查中，原因尚未確認。"},
+        {h:2,tag:"激憤",txt:"黑心？「清泉」喝出問題，廠商竟想低調壓下來不讓你知道。"},
+        {h:3,tag:"恐懼",txt:"驚！多人喝完「清泉」集體送醫⋯⋯你家冰箱還敢放嗎？"}
+      ]
+    },
+    {
+      tag:"02 / 分眾餵養",
+      tech:"演算法與同溫層效應",
+      prompt:"風向起來了。同一則謠言，要餵給哪一群人、怎麼包裝才最有效？",
+      opts:[
+        {h:1,tag:"中性",txt:"對所有人發一樣的中性說明，不分對象。"},
+        {h:2,tag:"母嬰",txt:"轉進媽媽社團：「為了孩子的健康，這種飲料千萬別再給家人喝！」"},
+        {h:3,tag:"對立",txt:"轉進論壇：「廠商勾結政府壓新聞，這是他們不想讓你知道的真相。」"}
+      ]
+    },
+    {
+      tag:"03 / 製造共識",
+      tech:"協同性造假（網軍）",
+      prompt:"最後一步：要讓大家覺得「全世界都這麼說」。你要怎麼動用手上的帳號？",
+      opts:[
+        {h:1,tag:"單帳號",txt:"只用一個帳號老老實實地發一次。"},
+        {h:3,tag:"灌量",txt:"動員五十個粉專，同一時間轉發同一套說法洗版。"},
+        {h:4,tag:"自演",txt:"用一批假帳號扮成不同立場的「自來水」，互相聲援、互相帶風向。"}
+      ]
+    }
+  ];
+
+  /* ---------- state ---------- */
+  let state, ri;
+  function reset(){
+    state = {favor:100, spread:0, panic:0};
+    ri = 0;
+  }
+
+  /* ---------- network canvas ---------- */
+  const cv = $("#net"), cx = cv.getContext("2d");
+  let W,H, nodes=[], edges=[], pulses=[], intensity=0;
+  function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; build(); }
+  function build(){
+    const count = Math.min(150, Math.max(60, Math.floor(W*H/14000)));
+    nodes = [];
+    for(let i=0;i<count;i++){
+      nodes.push({x:Math.random()*W,y:Math.random()*H,
+        vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,
+        a:0, base:0.06+Math.random()*0.06});
+    }
+    edges=[];
+    for(let i=0;i<nodes.length;i++){
+      // connect to a couple nearest-ish
+      let cand=[];
+      for(let j=0;j<nodes.length;j++) if(i!==j){
+        const d=(nodes[i].x-nodes[j].x)**2+(nodes[i].y-nodes[j].y)**2;
+        cand.push([d,j]);
+      }
+      cand.sort((a,b)=>a[0]-b[0]);
+      for(let k=0;k<2;k++) if(cand[k]) edges.push([i,cand[k][1]]);
+    }
+    $("#t-nodes").textContent = nodes.length;
+  }
+  function ignite(strength){
+    // light up a wave of nodes proportional to strength (1..4)
+    intensity = Math.min(1, intensity + strength*0.18);
+    const seeds = Math.floor(strength*strength*2)+2;
+    for(let s=0;s<seeds;s++){
+      const n = nodes[Math.floor(Math.random()*nodes.length)];
+      if(n){ n.a = 1; spread_from(n, strength); }
+    }
+  }
+  function spread_from(origin, strength){
+    // spawn travelling pulses to nearby nodes
+    let near = nodes.map((n,idx)=>[(origin.x-n.x)**2+(origin.y-n.y)**2,idx])
+                    .sort((a,b)=>a[0]-b[0]).slice(1, 2+strength*2);
+    near.forEach(([_,idx])=>{
+      pulses.push({fx:origin.x,fy:origin.y,tx:nodes[idx].x,ty:nodes[idx].y,t:0,
+        spd:0.012+Math.random()*0.02, idx});
+    });
+  }
+  function loop(){
+    cx.clearRect(0,0,W,H);
+    intensity *= 0.992;
+    // edges
+    cx.lineWidth=1;
+    for(const [a,b] of edges){
+      const n1=nodes[a],n2=nodes[b];
+      const lit=(n1.a+n2.a)/2;
+      cx.strokeStyle = lit>0.05
+        ? `rgba(255,${Math.floor(80-lit*40)},${Math.floor(90-lit*30)},${0.05+lit*0.35})`
+        : `rgba(40,60,75,${0.05+intensity*0.06})`;
+      cx.beginPath();cx.moveTo(n1.x,n1.y);cx.lineTo(n2.x,n2.y);cx.stroke();
+    }
+    // pulses
+    for(let i=pulses.length-1;i>=0;i--){
+      const p=pulses[i]; p.t+=p.spd;
+      const x=p.fx+(p.tx-p.fx)*p.t, y=p.fy+(p.ty-p.fy)*p.t;
+      cx.fillStyle="rgba(255,70,90,.9)";
+      cx.beginPath();cx.arc(x,y,1.8,0,7);cx.fill();
+      if(p.t>=1){ if(nodes[p.idx]){nodes[p.idx].a=1; if(Math.random()<.5) spread_from(nodes[p.idx], 1);} pulses.splice(i,1); }
+    }
+    // nodes
+    for(const n of nodes){
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
+      n.a*=0.97;
+      const glow=n.base+n.a;
+      if(n.a>0.04){
+        cx.fillStyle=`rgba(255,${Math.floor(60+ (1-n.a)*120)},75,${Math.min(1,n.a)})`;
+        cx.beginPath();cx.arc(n.x,n.y,1.6+n.a*2.6,0,7);cx.fill();
+        cx.fillStyle=`rgba(255,70,90,${n.a*0.12})`;
+        cx.beginPath();cx.arc(n.x,n.y,8+n.a*14,0,7);cx.fill();
+      }else{
+        cx.fillStyle=`rgba(120,180,190,${glow})`;
+        cx.beginPath();cx.arc(n.x,n.y,1.3,0,7);cx.fill();
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- flash floating numbers ---------- */
+  function flash(text,x,y,red){
+    const el=document.createElement("div");
+    el.className="flash"+(red?" r":"");
+    el.textContent=text; el.style.left=x+"px"; el.style.top=y+"px";
+    document.body.appendChild(el);
+    el.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"translateY(-10px)"},
+      {opacity:0,transform:"translateY(-46px)"}],{duration:1400,easing:"ease-out"});
+    setTimeout(()=>el.remove(),1400);
+  }
+
+  /* ---------- metric animation ---------- */
+  function tween(el,from,to,suffix,dur){
+    const t0=performance.now();
+    function step(t){
+      const k=Math.min(1,(t-t0)/dur);
+      const v=Math.floor(from+(to-from)*(1-(1-k)*(1-k)));
+      el.textContent=v.toLocaleString("en-US")+(suffix||"");
+      if(k<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function syncMetrics(prev){
+    tween($("#m-favor"),prev.favor,state.favor,"",700);
+    tween($("#m-spread"),prev.spread,state.spread,"",900);
+    tween($("#m-panic"),prev.panic,state.panic,"",700);
+    $("#bar-favor").style.width=state.favor+"%";
+    $("#bar-favor").style.background = state.favor>55?"var(--green)":state.favor>25?"var(--amber)":"var(--red)";
+    $("#bar-panic").style.width=Math.min(100,state.panic)+"%";
+  }
+
+  /* ---------- screens ---------- */
+  function showIntro(){
+    $("#dock").style.display="none";
+    $("#t-stage").textContent="待命";
+    $("#stage").innerHTML=`
+      <div class="card">
+        <div class="eyebrow">認知作戰模擬 · 加害者視角</div>
+        <h1>點擊背後的<br>藏鏡人</h1>
+        <p class="sub">你不是受害者。這一次，操盤的人是你。<br>只用幾張圖、幾則貼文，看你能不能搞垮一個品牌、動搖一群人的判斷。</p>
+        <div class="brief">
+          <div class="row"><span class="k">代號</span><span class="v">藏鏡人 / OPERATOR</span></div>
+          <div class="row" style="margin-top:8px"><span class="k">目標</span><span class="v">讓國產氣泡水「清泉」的公眾好感度歸零</span></div>
+          <div class="row" style="margin-top:8px"><span class="k">武器</span><span class="v">一則貼文，無數張臉</span></div>
+          <div class="row" style="margin-top:8px"><span class="k">注意</span><span class="v" style="color:var(--muted)">本作為媒體素養教育原型，目標與品牌皆為虛構</span></div>
+        </div>
+        <button class="btn" id="start">開始任務 <span class="arr">→</span></button>
+      </div>`;
+    $("#start").onclick=()=>{ reset(); $("#dock").style.display="flex"; syncMetrics(state); showRound(); };
+  }
+
+  function showRound(){
+    const r=ROUNDS[ri];
+    $("#t-stage").textContent=r.tag;
+    const optHtml=r.opts.map((o,i)=>`
+      <button class="opt" data-h="${o.h}" data-i="${i}">
+        <span class="tag">${o.tag}</span><span>${o.txt}</span>
+      </button>`).join("");
+    $("#stage").innerHTML=`
+      <div class="card">
+        <div class="roundtag">回合 <b>${ri+1}</b> / ${ROUNDS.length} &nbsp;·&nbsp; ${r.tag}</div>
+        <div class="prompt">${r.prompt}</div>
+        <div class="technique">${r.tech}</div>
+        <div class="opts">${optHtml}</div>
+      </div>`;
+    document.querySelectorAll(".opt").forEach(btn=>{
+      btn.onclick=e=>choose(parseInt(btn.dataset.h,10), btn);
+    });
+  }
+
+  function choose(h, btn){
+    document.querySelectorAll(".opt").forEach(b=>{ if(b!==btn) b.classList.add("disabled"); });
+    const prev={...state};
+    const favDrop = h*h*3 + h*5;                 // 1→8, 2→22, 3→42, 4→68
+    const spreadAdd = Math.floor(h*h*(900+Math.random()*1600));
+    const panicAdd = h*h + h*4;                  // 1→5,2→12,3→21,4→32
+    state.favor = Math.max(0, state.favor - favDrop);
+    state.spread += spreadAdd;
+    state.panic = Math.min(100, state.panic + panicAdd);
+
+    ignite(h);
+    const rect=btn.getBoundingClientRect();
+    flash("+"+spreadAdd.toLocaleString("en-US")+" 次擴散", rect.right-150, rect.top-6, h>=3);
+    setTimeout(()=>flash((h>=3?"恐慌 +":"恐慌 +")+panicAdd, rect.right-150, rect.top+18, true),180);
+    syncMetrics(prev);
+
+    setTimeout(()=>{
+      ri++;
+      if(ri<ROUNDS.length) showRound();
+      else endGame();
+    }, 1250);
+  }
+
+  function endGame(){
+    const won = state.favor<=30;
+    $("#dock").style.display="none";
+    $("#t-stage").textContent="完成";
+    if(won){
+      $("#win-stamp").textContent="▌ MISSION COMPLETE";
+      $("#win-title").textContent="任務成功";
+      $("#win-line").textContent=`目標社會已喪失抵抗意志。不費一兵一卒，「清泉」的好感度只剩 ${state.favor}%，恐慌指數攻上 ${state.panic}。你沒說過一句完整的謊，卻贏了。`;
+    }else{
+      $("#win-stamp").textContent="▌ MISSION FAILED";
+      $("#win-stamp").style.color="var(--muted)";
+      $("#win-title").textContent="任務失敗";
+      $("#win-line").textContent=`你太誠實了。好感度還有 ${state.favor}%——平實、查證過的訊息，就是擴散不出去。這本身就是第一課。`;
+    }
+    $("#screen-success").classList.add("show");
+  }
+
+  function showReveal(){
+    $("#screen-success").classList.remove("show");
+    $("#screen-reveal").classList.add("show");
+    // re-trigger stagger
+    const node=$("#screen-reveal .reveal-stagger");
+    node.querySelectorAll("*").forEach(el=>{ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; });
+  }
+
+  /* ---------- wire ---------- */
+  $("#to-reveal").onclick=showReveal;
+  $("#restart").onclick=()=>{ $("#screen-reveal").classList.remove("show"); showIntro(); };
+
+  addEventListener("resize",resize);
+  reset(); resize(); loop(); showIntro();
+})();
+</script>
+</body>
+</html>
