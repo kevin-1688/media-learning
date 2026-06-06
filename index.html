@@ -208,8 +208,11 @@
   .flash.r{color:var(--red);text-shadow:0 0 12px rgba(255,59,78,.6)}
 
   /* success / reveal full screens */
-  .full{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:28px;
+  .full{position:fixed;inset:0;z-index:5;display:flex;align-items:flex-start;justify-content:center;
+    padding:28px;padding-bottom:max(28px,env(safe-area-inset-bottom));
+    overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
     opacity:0;pointer-events:none;transition:opacity .6s}
+  .full > div{margin:auto 0}
   .full.show{opacity:1;pointer-events:auto}
   .success-bg{background:radial-gradient(80% 60% at 50% 50%,rgba(122,31,41,.35),rgba(8,10,14,.96))}
   .reveal-bg{background:#070809}
