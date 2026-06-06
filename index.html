@@ -22,12 +22,13 @@
     --amber:#ffb454;
     --green:#4ade80;
     --text:#cdd6de;
-    --muted:#62707e;
+    --muted:#74828f;
     --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
     --sans:'Noto Sans TC',system-ui,sans-serif;
     --serif:'Noto Serif TC',serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
   html,body{height:100%}
   body{
     background:var(--bg);
@@ -111,9 +112,37 @@
   .metric .val{font-family:var(--mono);font-weight:600;font-size:24px;margin-top:4px;color:var(--text);font-variant-numeric:tabular-nums}
   .metric.spread .val{color:var(--cyan)}
   .metric.panic .val{color:var(--red)}
-  .bar{height:6px;background:var(--line);margin-top:9px;overflow:hidden}
+  .bar{position:relative;height:6px;background:var(--line);margin-top:9px;overflow:hidden}
   .bar > i{display:block;height:100%;background:var(--green);transition:width .8s cubic-bezier(.2,.8,.2,1)}
-  .metric.favor .val{color:var(--green)}
+  .bar .thresh{position:absolute;top:0;bottom:0;left:70%;width:1px;background:var(--amber);opacity:.85;z-index:2}
+  .metric.favor .val{color:var(--cyan)}
+  /* result panel + share UX */
+  .result .resline{font-family:var(--serif);font-weight:700;font-size:clamp(19px,2.6vw,24px);line-height:1.5;color:#eef3f5;margin:8px 0 22px}
+  .deltas{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+  .deltas > div{display:flex;justify-content:space-between;align-items:center;background:var(--panel);padding:13px 16px}
+  .deltas .dl{font-size:13.5px;color:var(--text)}
+  .deltas .dv{font-family:var(--mono);font-weight:600;font-size:15px;color:var(--red)}
+  .deltas .dl.block b{color:var(--green)}
+  .deltas .dv.block{color:var(--green)}
+  .chart{margin:4px 0 16px;border:1px solid var(--line);background:var(--bg2);padding:12px 12px 8px}
+  .chart svg{width:100%;height:96px;display:block}
+  .chart .axis{stroke:var(--line2);stroke-width:1}
+  .chart .checkline{stroke:var(--cyan-dim);stroke-width:1;stroke-dasharray:3 3;opacity:.55}
+  .chart #cline{fill:none;stroke:var(--red);stroke-width:2;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(255,59,78,.4))}
+  .chart #chead{fill:#fff}
+  .chartlabels{display:flex;justify-content:space-between;align-items:center;margin-top:6px;min-height:16px}
+  .ctimer{font-family:var(--mono);font-size:11.5px;color:var(--amber)}
+  .ctimer b{color:var(--red)}
+  .cdone{font-family:var(--mono);font-size:11.5px;color:var(--green);opacity:0;transition:opacity .3s}
+  .cdone.show{opacity:1}
+  .checkline-note{font-size:13px;color:var(--green);line-height:1.6;margin-top:14px}
+  .checkline-note::before{content:"▸ ";color:var(--green)}
+  .opt.picked{border-color:var(--cyan)}
+  .btn.share{margin-top:26px;background:var(--cyan)}
+  .linklike{cursor:pointer;color:var(--cyan)}
+  .linklike:hover{text-decoration:underline}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:12.5px;padding:11px 18px;opacity:0;transition:opacity .3s,transform .3s;z-index:7;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .flash{position:fixed;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--cyan);
     pointer-events:none;z-index:6;text-shadow:0 0 12px rgba(54,227,209,.6);opacity:0}
@@ -186,7 +215,7 @@
 </style>
 </head>
 <body>
-  <canvas id="net"></canvas>
+  <canvas id="net" aria-hidden="true"></canvas>
   <div class="grain"></div>
   <div class="vignette"></div>
   <div class="scan"></div>
@@ -207,9 +236,9 @@
 
     <div class="dock" id="dock" style="display:none">
       <div class="metric favor">
-        <div class="lab">目標好感度</div>
-        <div class="val"><span id="m-favor">100</span><span style="font-size:14px;color:var(--muted)">%</span></div>
-        <div class="bar"><i id="bar-favor" style="width:100%"></i></div>
+        <div class="lab">目標攻陷進度</div>
+        <div class="val"><span id="m-favor">0</span><span style="font-size:14px;color:var(--muted)">%</span></div>
+        <div class="bar"><span class="thresh"></span><i id="bar-favor" style="width:0%"></i></div>
       </div>
       <div class="metric spread">
         <div class="lab">假訊息擴散</div>
@@ -256,13 +285,15 @@
           <div class="s">別只看社群聲量，比對不同立場的傳統媒體與一手來源。</div>
         </div>
       </div>
-      <div class="endmeta" style="animation-delay:.8s">
+      <button class="btn share" id="share" style="animation-delay:.8s">把這個傳給最容易被騙的那個人 <span class="arr">→</span></button>
+      <div class="endmeta" style="animation-delay:.9s">
         <span>《點擊背後的藏鏡人》· 原型 demo</span>
-        <span style="cursor:pointer;color:var(--cyan)" id="restart">↻ 再玩一次</span>
+        <span class="linklike" role="button" tabindex="0" id="restart">↻ 再玩一次</span>
       </div>
     </div>
   </div>
 
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 (function(){
   "use strict";
@@ -419,11 +450,12 @@
     requestAnimationFrame(step);
   }
   function syncMetrics(prev){
-    tween($("#m-favor"),prev.favor,state.favor,"",700);
+    const fall=100-state.favor, pfall=100-prev.favor;
+    tween($("#m-favor"),pfall,fall,"",700);
     tween($("#m-spread"),prev.spread,state.spread,"",900);
     tween($("#m-panic"),prev.panic,state.panic,"",700);
-    $("#bar-favor").style.width=state.favor+"%";
-    $("#bar-favor").style.background = state.favor>55?"var(--green)":state.favor>25?"var(--amber)":"var(--red)";
+    $("#bar-favor").style.width=fall+"%";
+    $("#bar-favor").style.background = fall<45?"var(--cyan)":fall<70?"var(--amber)":"var(--red)";
     $("#bar-panic").style.width=Math.min(100,state.panic)+"%";
   }
 
@@ -466,27 +498,115 @@
     });
   }
 
+  const RESULT_LINES = {
+    1:"你選了最克制的版本。真相不夠刺激，幾乎沒人轉發。",
+    2:"你加了情緒。願意不查證就分享的人，開始變多。",
+    3:"你選了最聳動的版本。恐懼讓人來不及思考就按下分享。",
+    4:"你假裝成很多人。「大家都這麼說」的錯覺，成形了。"
+  };
+  const CHECK_LINES = {
+    1:"獨立事實查核幾乎同步補刀——這則訊息等於沒發生過。",
+    2:"事實查核趕上了，砍掉一大半的擴散。",
+    3:"你夠快、夠聳動，在查核發布前已經鎖住不少傷害。",
+    4:"你用人海搶在查核前洗版，連攔截都擋不完。"
+  };
+  const LOCKED = {1:0.30, 2:0.45, 3:0.62, 4:0.74};
+
+  function applyMetricsDisplay(from, to){
+    tween($("#m-favor"),100-from.favor,100-to.favor,"",700);
+    tween($("#m-spread"),from.spread,to.spread,"",900);
+    tween($("#m-panic"),from.panic,to.panic,"",700);
+    const ft=100-to.favor;
+    $("#bar-favor").style.width=ft+"%";
+    $("#bar-favor").style.background = ft<45?"var(--cyan)":ft<70?"var(--amber)":"var(--red)";
+    $("#bar-panic").style.width=Math.min(100,to.panic)+"%";
+  }
+
   function choose(h, btn){
-    document.querySelectorAll(".opt").forEach(b=>{ if(b!==btn) b.classList.add("disabled"); });
-    const prev={...state};
-    const favDrop = h*h*3 + h*5;                 // 1→8, 2→22, 3→42, 4→68
-    const spreadAdd = Math.floor(h*h*(900+Math.random()*1600));
-    const panicAdd = h*h + h*4;                  // 1→5,2→12,3→21,4→32
-    state.favor = Math.max(0, state.favor - favDrop);
-    state.spread += spreadAdd;
-    state.panic = Math.min(100, state.panic + panicAdd);
-
+    document.querySelectorAll(".opt").forEach(b=>b.classList.add("disabled"));
+    btn.classList.remove("disabled"); btn.classList.add("picked");
     ignite(h);
-    const rect=btn.getBoundingClientRect();
-    flash("+"+spreadAdd.toLocaleString("en-US")+" 次擴散", rect.right-150, rect.top-6, h>=3);
-    setTimeout(()=>flash((h>=3?"恐慌 +":"恐慌 +")+panicAdd, rect.right-150, rect.top+18, true),180);
-    syncMetrics(prev);
+    setTimeout(()=>runResult(h), 480);
+  }
 
-    setTimeout(()=>{
-      ri++;
-      if(ri<ROUNDS.length) showRound();
-      else endGame();
-    }, 1250);
+  function runResult(h){
+    const last = ri===ROUNDS.length-1;
+    const rawSpread = Math.floor(h*h*(900+Math.random()*1600));
+    const rawPanic  = h*h + h*4;
+    const rawFav    = h*h*3 + h*5;
+    const lock = LOCKED[h];
+    const effSpread = Math.round(rawSpread*lock);
+    const effPanic  = Math.round(rawPanic*lock);
+    const effFav    = Math.round(rawFav*lock);
+    const blocked   = rawSpread - effSpread;
+    const prev={...state};
+    const peak={favor:Math.max(0,state.favor-rawFav), spread:state.spread+rawSpread, panic:Math.min(100,state.panic+rawPanic)};
+    const finalS={favor:Math.max(0,state.favor-effFav), spread:state.spread+effSpread, panic:Math.min(100,state.panic+effPanic)};
+
+    $("#stage").innerHTML=`
+      <div class="card result">
+        <div class="roundtag">回合 ${ri+1} / ${ROUNDS.length} &nbsp;·&nbsp; 擴散 vs. 查核</div>
+        <p class="resline">${RESULT_LINES[h]}</p>
+        <div class="chart">
+          <svg id="curve" viewBox="0 0 300 96" preserveAspectRatio="none" aria-hidden="true">
+            <line class="axis" x1="0" y1="92" x2="300" y2="92"></line>
+            <line x1="165" y1="6" x2="165" y2="92" class="checkline"></line>
+            <polyline id="cline" points=""></polyline>
+            <circle id="chead" r="3" cx="0" cy="92"></circle>
+          </svg>
+          <div class="chartlabels">
+            <span id="ctimer" class="ctimer">事實查核介入：<b>30</b>s</span>
+            <span id="cdone" class="cdone">✓ 查核報告發布</span>
+          </div>
+        </div>
+        <div class="deltas" id="deltas" style="opacity:0">
+          <div><span class="dl">假訊息擴散</span><span class="dv">+${effSpread.toLocaleString("en-US")}</span></div>
+          <div><span class="dl block"><b>事實查核攔截</b></span><span class="dv block">−${blocked.toLocaleString("en-US")}</span></div>
+          <div><span class="dl">社會恐慌</span><span class="dv">+${effPanic}</span></div>
+          <div><span class="dl">目標攻陷</span><span class="dv">+${effFav}%</span></div>
+        </div>
+        <p class="checkline-note" id="cnote" style="opacity:0">${CHECK_LINES[h]}</p>
+        <button class="btn" id="next" style="opacity:0;pointer-events:none">${last?"看我做了什麼":"下一步"} <span class="arr">→</span></button>
+      </div>`;
+
+    const line=$("#cline"), head=$("#chead"), timerB=$("#ctimer b"),
+          timerWrap=$("#ctimer"), done=$("#cdone");
+    const W=300, baseY=92;
+    const peakH = 16 + lock*62;
+    const peakY = baseY - peakH;
+    const resY  = baseY - peakH*lock*0.9;
+    const pc = 165/W;
+    let pts=[], checked=false, settled=false;
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DUR = reduce?700:3000;
+    const start=performance.now();
+    applyMetricsDisplay(prev, peak);
+
+    function frame(t){
+      const p=Math.min(1,(t-start)/DUR);
+      const x=p*W; let y;
+      if(p<pc){
+        const k=p/pc; y=baseY-peakH*(1-(1-k)*(1-k));
+        timerB.textContent=Math.max(0,Math.ceil(30*(1-k)));
+      } else if(p<pc+0.10){
+        const k=(p-pc)/0.10; y=peakY+(resY-peakY)*k;
+        if(!checked){ checked=true; timerWrap.style.display="none"; done.classList.add("show"); applyMetricsDisplay(peak, finalS); }
+      } else { y=resY; }
+      pts.push(x.toFixed(1)+","+y.toFixed(1));
+      line.setAttribute("points", pts.join(" "));
+      head.setAttribute("cx", x.toFixed(1)); head.setAttribute("cy", y.toFixed(1));
+      if(p<1) requestAnimationFrame(frame); else finish();
+    }
+    function finish(){
+      if(settled)return; settled=true;
+      state=finalS;
+      const dq=$("#deltas"); dq.style.transition="opacity .4s"; dq.style.opacity="1";
+      const cn=$("#cnote"); cn.style.transition="opacity .4s .12s"; cn.style.opacity="1";
+      const nx=$("#next"); nx.style.transition="opacity .4s .28s"; nx.style.opacity="1"; nx.style.pointerEvents="auto";
+      nx.onclick=()=>{ ri++; if(ri<ROUNDS.length) showRound(); else endGame(); };
+      nx.focus();
+    }
+    requestAnimationFrame(frame);
   }
 
   function endGame(){
@@ -515,8 +635,20 @@
   }
 
   /* ---------- wire ---------- */
+  function toast(msg){ const t=$("#toast"); if(!t)return; t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
   $("#to-reveal").onclick=showReveal;
-  $("#restart").onclick=()=>{ $("#screen-reveal").classList.remove("show"); showIntro(); };
+  $("#share").onclick=async()=>{
+    const data={title:"點擊背後的藏鏡人",
+      text:"我剛當了一次網軍頭子，結果被自己玩的遊戲將了一軍。你也來試試？",
+      url:location.href};
+    try{
+      if(navigator.share){ await navigator.share(data); }
+      else{ await navigator.clipboard.writeText(data.text+" "+data.url); toast("連結已複製，貼到脆上吧"); }
+    }catch(e){}
+  };
+  const restart=()=>{ $("#screen-reveal").classList.remove("show"); showIntro(); };
+  $("#restart").onclick=restart;
+  $("#restart").addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); restart(); } });
 
   addEventListener("resize",resize);
   reset(); resize(); loop(); showIntro();
