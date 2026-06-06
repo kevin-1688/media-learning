@@ -46,7 +46,7 @@
   .grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
 
-  .wrap{position:relative;z-index:3;height:100%;display:flex;flex-direction:column}
+  .wrap{position:relative;z-index:3;height:100vh;height:100dvh;display:flex;flex-direction:column}
 
   /* top status bar */
   .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;
@@ -94,6 +94,8 @@
     padding:16px 18px;color:var(--text);font-size:15px;line-height:1.55;font-family:var(--sans);
     display:flex;gap:14px;align-items:flex-start;transition:border-color .15s, transform .12s, background .15s}
   .opt:hover{border-color:var(--cyan-dim);transform:translateX(3px)}
+  .opt:active{transform:scale(.992)}
+  .btn:active{transform:translateY(0)}
   .opt .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 7px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap;margin-top:1px}
   .opt[data-h="3"]:hover,.opt[data-h="4"]:hover{border-color:var(--red);}
   .opt[data-h="1"] .tag{color:var(--muted)}
@@ -144,12 +146,42 @@
   .reveal-stagger > *{opacity:0;transform:translateY(14px);animation:rise .7s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
 
+  /* ---------- responsive ---------- */
+  @media(max-width:900px){
+    .stage{padding:20px}
+  }
   @media(max-width:620px){
-    .deb .head,.deb .r{grid-template-columns:1fr}
-    .deb .head span:nth-child(n+2){display:none}
-    .dock{flex-wrap:wrap}
-    .metric{min-width:50%}
+    .stage{padding:16px 14px;align-items:flex-start}
+    .sub{font-size:14px}
+    .brief{padding:14px 15px}
+    .opt{font-size:14px;padding:14px;gap:10px}
+    .prompt{font-size:20px}
+    /* dock: keep 3-up, compact instead of wrapping */
+    .metric{padding:10px}
+    .metric .lab{font-size:9px;letter-spacing:.04em}
+    .metric .val{font-size:17px}
+    .bar{margin-top:7px;height:5px}
+    /* reveal table -> stacked, labelled cards (keep column meaning) */
+    .deb{gap:10px;background:transparent}
+    .deb .head{display:none}
+    .deb .r{grid-template-columns:1fr;gap:0;border:1px solid var(--line)}
+    .deb .r > div{padding:12px 14px}
+    .deb .r .m{border-bottom:1px solid var(--line)}
+    .deb .r .m::before{content:"手法";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:4px}
+    .deb .r .t::before{content:"現實真相";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:4px}
+    .deb .r .s{background:var(--panel2)}
+    .deb .r .s::before{content:"盾牌 ▸ ";color:var(--green);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+    .endmeta{font-size:11px}
     .topbar{font-size:11px;gap:8px;flex-wrap:wrap}
+  }
+  @media(max-width:480px){
+    .topbar > span:nth-child(4),.topbar > span:nth-child(5){display:none} /* hide node-count meta */
+    .topbar > span:last-child{display:none} /* hide version meta */
+    h1{font-size:38px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .dot{animation:none}
+    .reveal-stagger > *{animation:none;opacity:1;transform:none}
   }
 </style>
 </head>
@@ -282,7 +314,10 @@
   let W,H, nodes=[], edges=[], pulses=[], intensity=0;
   function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; build(); }
   function build(){
-    const count = Math.min(150, Math.max(60, Math.floor(W*H/14000)));
+    const small = W<620;
+    const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let count = Math.min(small?80:150, Math.max(small?32:60, Math.floor(W*H/14000)));
+    if(rm) count = Math.min(count, 36);
     nodes = [];
     for(let i=0;i<count;i++){
       nodes.push({x:Math.random()*W,y:Math.random()*H,
@@ -364,6 +399,7 @@
   function flash(text,x,y,red){
     const el=document.createElement("div");
     el.className="flash"+(red?" r":"");
+    x=Math.max(12,Math.min(x,innerWidth-150));
     el.textContent=text; el.style.left=x+"px"; el.style.top=y+"px";
     document.body.appendChild(el);
     el.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"translateY(-10px)"},
