@@ -190,6 +190,12 @@
   .cdone.show{opacity:1}
   .checkline-note{font-size:13px;color:var(--green);line-height:1.6;margin-top:14px}
   .checkline-note::before{content:"▸ ";color:var(--green)}
+  .backfire{border:1px solid var(--red-dim);background:rgba(122,31,41,.14);padding:14px 16px;margin-top:16px;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+  .backfire.show{opacity:1;transform:none}
+  .backfire .bf-h{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--red);margin-bottom:6px}
+  .backfire p{font-size:13.5px;line-height:1.65;color:var(--text)}
+  .backfire .bf-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--red-dim);font-size:13px;color:var(--green)}
+  .backfire .bf-row b{font-family:var(--mono);color:var(--green)}
   .opt.picked{border-color:var(--cyan)}
   .btn.share{margin-top:26px;background:var(--cyan)}
   .linklike{cursor:pointer;color:var(--cyan)}
@@ -655,9 +661,30 @@
       state=finalS;
       const dq=$("#deltas"); dq.style.transition="opacity .4s"; dq.style.opacity="1";
       const cn=$("#cnote"); cn.style.transition="opacity .4s .12s"; cn.style.opacity="1";
-      const nx=$("#next"); nx.style.transition="opacity .4s .28s"; nx.style.opacity="1"; nx.style.pointerEvents="auto";
-      nx.onclick=()=>{ ri++; if(ri<ROUNDS.length) showRound(); else endGame(); };
-      nx.focus();
+      const nx=$("#next");
+      const enableNext=()=>{
+        nx.style.transition="opacity .4s"; nx.style.opacity="1"; nx.style.pointerEvents="auto";
+        nx.onclick=()=>{ ri++; if(ri<ROUNDS.length) showRound(); else endGame(); };
+        nx.focus();
+      };
+      if(h===4) setTimeout(()=>backfire(enableNext), 950);
+      else enableNext();
+    }
+    function backfire(then){
+      const claw=18;
+      const bf={ favor:Math.min(100, finalS.favor+claw),
+                 spread:Math.max(0, finalS.spread-Math.round(effSpread*0.4)),
+                 panic:Math.max(0, finalS.panic-4) };
+      applyMetricsDisplay(finalS, bf); state=bf;
+      const box=document.createElement("div");
+      box.className="backfire";
+      box.innerHTML='<div class="bf-h">⚠ 平台反制</div>'+
+        '<p>你的協同帳號 IP 過度集中，遭平台偵測、集體停權，假訊息被反查——維持這個謊，燒掉了你大半的帳號軍團。協同造假是最容易被抓到的一手。</p>'+
+        '<div class="bf-row"><span>目標好感度回升（攻陷被打回）</span><b>+'+claw+'%</b></div>';
+      const card=document.querySelector(".result");
+      card.insertBefore(box, $("#next"));
+      requestAnimationFrame(()=>box.classList.add("show"));
+      setTimeout(then, 650);
     }
     requestAnimationFrame(frame);
   }
