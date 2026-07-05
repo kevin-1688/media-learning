@@ -295,6 +295,7 @@
       <span class="sep">|</span>
       <span class="muted"><span id="t-stage-label"></span> <b id="t-stage" style="color:var(--text)"></b></span>
       <span class="spacer"></span>
+      <button class="langbtn" id="mutebtn" type="button" aria-label="Toggle sound">♪ ON</button>
       <button class="langbtn" id="langbtn" type="button" aria-label="Switch language"></button>
       <span class="muted" id="t-version"></span>
     </div>
@@ -355,6 +356,127 @@
      留空則使用目前頁面網址（在 itch iframe 內會是內部網址）。
      ================================================ */
   const SHARE_URL = "";
+
+  /* ---------- sound design (Web Audio 合成,無外部檔案) ---------- */
+  const SFX = (() => {
+    let ac = null, master = null, ambGain = null, ambFilter = null;
+    let muted = false, ambTarget = 0;
+    try{ muted = localStorage.getItem("hh_muted") === "1"; }catch(e){}
+
+    function ensure(){
+      if(ac) { if(ac.state === "suspended") ac.resume(); return true; }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      try{
+        ac = new AC();
+        master = ac.createGain();
+        master.gain.value = muted ? 0 : 0.5;
+        master.connect(ac.destination);
+        startAmbient();
+      }catch(e){ ac = null; return false; }
+      return true;
+    }
+    /* 低鳴氛圍:兩支微失諧鋸齒波 + 低通,音量跟隨擴散強度 */
+    function startAmbient(){
+      ambFilter = ac.createBiquadFilter();
+      ambFilter.type = "lowpass"; ambFilter.frequency.value = 140; ambFilter.Q.value = 6;
+      ambGain = ac.createGain(); ambGain.gain.value = 0;
+      const o1 = ac.createOscillator(), o2 = ac.createOscillator(), sub = ac.createOscillator();
+      o1.type = "sawtooth"; o1.frequency.value = 55;
+      o2.type = "sawtooth"; o2.frequency.value = 55.7;
+      sub.type = "sine"; sub.frequency.value = 27.5;
+      const lfo = ac.createOscillator(), lfoG = ac.createGain();
+      lfo.frequency.value = 0.07; lfoG.gain.value = 55;
+      lfo.connect(lfoG); lfoG.connect(ambFilter.frequency);
+      o1.connect(ambFilter); o2.connect(ambFilter); sub.connect(ambFilter);
+      ambFilter.connect(ambGain); ambGain.connect(master);
+      o1.start(); o2.start(); sub.start(); lfo.start();
+      ambTarget = 0.05;
+    }
+    function ambient(intensity){ // 每幀呼叫:0(平靜)~1(全面擴散)
+      if(!ambGain) return;
+      const t = muted ? 0 : (0.05 + intensity * 0.11);
+      ambTarget += (t - ambTarget) * 0.02;
+      ambGain.gain.value = ambTarget;
+    }
+    function env(node, t0, vol, dur, curve){
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + (curve || 0.008));
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      node.connect(g); g.connect(master);
+      return g;
+    }
+    function blip(freq, dur, type, vol, slideTo){
+      if(!ac || muted) return;
+      const t0 = ac.currentTime;
+      const o = ac.createOscillator();
+      o.type = type || "sine"; o.frequency.setValueAtTime(freq, t0);
+      if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+      env(o, t0, vol || 0.1, dur);
+      o.start(t0); o.stop(t0 + dur + 0.05);
+    }
+    function noise(dur, freq, q, vol, delay){
+      if(!ac || muted) return;
+      const t0 = ac.currentTime + (delay || 0);
+      const len = Math.max(1, Math.floor(ac.sampleRate * dur));
+      const buf = ac.createBuffer(1, len, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for(let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q || 1;
+      src.connect(f);
+      env(f, t0, vol || 0.1, dur);
+      src.start(t0);
+    }
+    return {
+      ensure, ambient,
+      get muted(){ return muted; },
+      toggle(){
+        muted = !muted;
+        try{ localStorage.setItem("hh_muted", muted ? "1" : "0"); }catch(e){}
+        if(master) master.gain.value = muted ? 0 : 0.5;
+        return muted;
+      },
+      tick(){ blip(1700, 0.03, "square", 0.028); },                    // 滑過選項
+      click(){ blip(660, 0.05, "square", 0.07); blip(1320, 0.04, "sine", 0.04); }, // 一般按鈕
+      select(h){                                                       // 選擇選項,越惡劣越低沉
+        blip(430 - h * 55, 0.16, "sawtooth", 0.09, 190 - h * 20);
+        if(h >= 3){ blip(60, 0.3, "sine", 0.16, 40); noise(0.22, 320, 0.8, 0.06); }
+      },
+      igniteBurst(strength){                                           // 假訊息點燃擴散
+        for(let i = 0; i < strength + 1; i++)
+          noise(0.1 + Math.random() * 0.1, 700 + Math.random() * 900, 2.5, 0.045, i * 0.07 + Math.random() * 0.05);
+      },
+      timerTick(sec){ blip(1050 + (30 - sec) * 14, 0.022, "sine", 0.032); }, // 查核倒數
+      factcheck(){ blip(880, 0.09, "sine", 0.08); blip(1320, 0.14, "sine", 0.07); }, // 查核發布
+      alarm(){                                                          // 平台反制警報
+        if(!ac || muted) return;
+        for(let i = 0; i < 3; i++){
+          const t0 = ac.currentTime + i * 0.19;
+          const o = ac.createOscillator(), o2 = ac.createOscillator();
+          o.type = "sawtooth"; o.frequency.value = 152;
+          o2.type = "sawtooth"; o2.frequency.value = 157;
+          env(o, t0, 0.075, 0.15); env(o2, t0, 0.075, 0.15);
+          o.start(t0); o.stop(t0 + 0.2); o2.start(t0); o2.stop(t0 + 0.2);
+        }
+      },
+      win(){                                                            // 任務成功:陰暗和弦
+        blip(220, 1.1, "sawtooth", 0.06);
+        blip(261.6, 1.1, "sawtooth", 0.05);
+        blip(311.1, 1.1, "sawtooth", 0.05);
+        blip(55, 1.4, "sine", 0.14);
+        noise(0.8, 180, 0.7, 0.04);
+      },
+      lose(){ blip(196, 0.85, "sine", 0.1, 150); },                     // 任務失敗:黯淡下滑
+      reveal(){ blip(55, 1.6, "sine", 0.1, 110); noise(1.4, 400, 0.5, 0.035); }, // 揭露頁湧升
+      whoosh(){ noise(0.22, 900, 0.6, 0.05); }                          // 回合切換
+    };
+  })();
+
+  /* 首次互動才建立 AudioContext(瀏覽器 autoplay 政策) */
+  ["pointerdown", "keydown", "touchstart"].forEach(ev =>
+    addEventListener(ev, () => SFX.ensure(), { once: false, passive: true }));
 
   /* ---------- i18n ---------- */
   const I18N = {
@@ -664,6 +786,7 @@
     $("#t-nodes").textContent = nodes.length;
   }
   function ignite(strength){
+    SFX.igniteBurst(strength);
     intensity = Math.min(1, intensity + strength*0.18);
     const seeds = Math.floor(strength*strength*2)+2;
     for(let s=0;s<seeds;s++){
@@ -682,6 +805,7 @@
   function loop(){
     cx.clearRect(0,0,W,H);
     intensity *= 0.992;
+    SFX.ambient(intensity);
     cx.lineWidth=1;
     for(const [a,b] of edges){
       const n1=nodes[a],n2=nodes[b];
@@ -775,6 +899,7 @@
   function showRound(){
     const t=T();
     const r=t.rounds[ri];
+    if(screen!=="round") SFX.whoosh();
     screen="round";
     stageState={type:"round", ri:ri};
     $("#t-stage").textContent=stageText();
@@ -799,6 +924,7 @@
   function choose(h, btn){
     document.querySelectorAll(".opt").forEach(b=>b.classList.add("disabled"));
     btn.classList.remove("disabled"); btn.classList.add("picked");
+    SFX.select(h);
     ignite(h);
     const rawSpread = Math.floor(h*h*(900+Math.random()*1600));
     const rawPanic  = h*h + h*4;
@@ -858,7 +984,7 @@
     const peakY = baseY - peakH;
     const resY  = baseY - peakH*lock*0.9;
     const pc = 165/CW;
-    let pts=[], checked=false, settled=false;
+    let pts=[], checked=false, settled=false, lastSec=31;
 
     function yAt(p){
       if(p<pc){ const k=p/pc; return baseY-peakH*(1-(1-k)*(1-k)); }
@@ -870,7 +996,7 @@
       checked=true;
       timerWrap.style.display="none";
       done.classList.add("show");
-      if(animateMetrics) applyMetricsDisplay(peak, finalS);
+      if(animateMetrics){ applyMetricsDisplay(peak, finalS); SFX.factcheck(); }
     }
     function finish(){
       if(settled)return; settled=true;
@@ -898,6 +1024,7 @@
         applyMetricsDisplay(finalS, ctx.bf);
         state={...ctx.bf};
         ctx.backfired=true;
+        SFX.alarm();
       }
       const box=document.createElement("div");
       box.className="backfire";
@@ -932,7 +1059,11 @@
       const p=Math.min(1,(tm-start)/DUR);
       const x=p*CW;
       const y=yAt(p);
-      if(p<pc) timerB.textContent=Math.max(0,Math.ceil(30*(1-p/pc)));
+      if(p<pc){
+        const sec=Math.max(0,Math.ceil(30*(1-p/pc)));
+        if(sec!==lastSec){ lastSec=sec; if(sec<30 && sec%3===0) SFX.timerTick(sec); }
+        timerB.textContent=sec;
+      }
       else markChecked(true);
       pts.push(x.toFixed(1)+","+y.toFixed(1));
       line.setAttribute("points", pts.join(" "));
@@ -944,6 +1075,7 @@
 
   function endGame(){
     endWon = state.favor<=30;
+    if(endWon) SFX.win(); else SFX.lose();
     screen="success";
     stageState={type:"done"};
     $("#dock").style.display="none";
@@ -967,6 +1099,7 @@
   }
 
   function showReveal(){
+    SFX.reveal();
     screen="reveal";
     $("#screen-success").classList.remove("show");
     $("#screen-reveal").classList.add("show");
@@ -988,6 +1121,23 @@
       }catch(e2){ return false; }
     }
   }
+
+  /* UI 音效(事件委派) */
+  let hoverLast=null;
+  document.addEventListener("click",e=>{
+    if(e.target.closest("#mutebtn")||e.target.closest(".opt")) return; // 各自有音效
+    if(e.target.closest(".btn,.linklike,.langbtn")) SFX.click();
+  });
+  document.addEventListener("mouseover",e=>{
+    const o=e.target.closest(".opt,.btn");
+    if(o && !o.classList.contains("disabled")){ if(o!==hoverLast){ hoverLast=o; SFX.tick(); } }
+    else hoverLast=null;
+  });
+
+  const muteBtn=$("#mutebtn");
+  const updMute=()=>{ muteBtn.textContent = SFX.muted ? "♪ OFF" : "♪ ON"; muteBtn.style.opacity = SFX.muted ? ".55" : "1"; };
+  muteBtn.onclick=()=>{ SFX.ensure(); SFX.toggle(); updMute(); if(!SFX.muted) SFX.click(); };
+  updMute();
 
   $("#langbtn").onclick=()=>setLang(lang==="zh"?"en":"zh");
   $("#to-reveal").onclick=showReveal;
