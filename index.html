@@ -5,21 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>點擊背後的藏鏡人｜認知作戰互動體驗</title>
 <meta name="description" content="一款讓你親手扮演網軍、操弄假訊息的互動遊戲。三回合過後，它揭露你用過的每一招在現實中如何運作，以及事實查核如何反制——兩分鐘的媒體識讀震撼教育。">
-<meta name="keywords" content="認知作戰,假訊息,媒體素養,媒體識讀,事實查核,資訊操弄,網軍,同溫層,內容農場,台灣,互動遊戲">
+<meta name="keywords" content="認知作戰,假訊息,媒體素養,媒體識讀,事實查核,資訊操弄,網軍,同溫層,內容農場,台灣,互動遊戲,media literacy,disinformation">
 <meta name="author" content="WAKE STUDIO">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#080a0e">
-<link rel="canonical" href="https://media-learning.vercel.app/">
 
-<!-- Open Graph (脆 / FB / LINE 預覽卡) -->
+<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="WAKE STUDIO">
 <meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="點擊背後的藏鏡人｜你以為你在玩遊戲，其實你正在當網軍">
 <meta property="og:description" content="親手操弄一則假訊息、搞垮一個目標——然後遊戲反過來告訴你，你剛用的每一招現實中正有人對你用，以及事實查核如何切斷它。">
-<meta property="og:url" content="https://media-learning.vercel.app/">
-<meta property="og:image" content="https://media-learning.vercel.app/og-image.png">
-<meta property="og:image:secure_url" content="https://media-learning.vercel.app/og-image.png">
+<meta property="og:image" content="og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -29,24 +27,22 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="點擊背後的藏鏡人｜你以為你在玩遊戲，其實你正在當網軍">
 <meta name="twitter:description" content="親手操弄一則假訊息、搞垮一個目標——然後遊戲反過來告訴你，你剛用的每一招現實中正有人對你用。">
-<meta name="twitter:image" content="https://media-learning.vercel.app/og-image.png">
+<meta name="twitter:image" content="og-image.png">
 <meta name="twitter:image:alt" content="點擊背後的藏鏡人 — 認知作戰互動體驗">
-<!-- <meta name="twitter:site" content="@你的帳號"> -->
 
-<!-- favicon (inline, 無需額外檔案) -->
+<!-- favicon (inline) -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080a0e'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%2336e3d1' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.4' fill='%23ff3b4e'/%3E%3C/svg%3E">
 
-<!-- 結構化資料 -->
+<!-- structured data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "VideoGame",
   "name": "點擊背後的藏鏡人",
   "alternateName": "The Hidden Hand Behind the Click",
-  "description": "一款媒體識讀互動遊戲：玩家扮演操弄假訊息的網軍，親身體驗資訊操弄、同溫層與協同造假如何運作，並在過程中看見事實查核如何反制。",
-  "url": "https://media-learning.vercel.app/",
-  "image": "https://media-learning.vercel.app/og-image.png",
-  "inLanguage": "zh-Hant",
+  "description": "一款媒體識讀互動遊戲：玩家扮演操弄假訊息的網軍，親身體驗資訊操弄、同溫層與協同造假如何運作，並在過程中看見事實查核如何反制。A media-literacy game where you play the troll — then see how every trick you used works on you in real life.",
+  "image": "og-image.png",
+  "inLanguage": ["zh-Hant", "en"],
   "genre": ["Educational", "Serious Game"],
   "applicationCategory": "Game",
   "gamePlatform": "Web browser",
@@ -54,7 +50,7 @@
   "isAccessibleForFree": true,
   "publisher": { "@type": "Organization", "name": "WAKE STUDIO" },
   "author": { "@type": "Organization", "name": "WAKE STUDIO" },
-  "about": ["媒體素養", "認知作戰", "假訊息", "事實查核"]
+  "about": ["媒體素養", "認知作戰", "假訊息", "事實查核", "media literacy", "disinformation", "fact-checking"]
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,6 +108,10 @@
   .topbar .sep{color:var(--line2)}
   .topbar .muted{color:var(--muted)}
   .topbar .spacer{flex:1}
+  .langbtn{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+    color:var(--cyan);background:transparent;border:1px solid var(--cyan-dim);padding:4px 10px;
+    transition:background .15s}
+  .langbtn:hover{background:rgba(54,227,209,.08)}
 
   .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
 
@@ -119,11 +119,11 @@
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
   .eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan)}
 
-  h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,6vw,64px);line-height:1.02;letter-spacing:.02em;color:#f2f6f8}
+  h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,6vw,64px);line-height:1.08;letter-spacing:.02em;color:#f2f6f8}
   .sub{margin-top:18px;color:var(--muted);font-size:15px;line-height:1.8;max-width:54ch}
   .brief{margin-top:26px;border:1px solid var(--line);background:var(--panel);padding:18px 20px;font-size:14px;line-height:1.9}
   .brief .row{display:flex;gap:14px;font-family:var(--mono);font-size:12.5px}
-  .brief .k{color:var(--cyan-dim);min-width:64px;letter-spacing:.1em}
+  .brief .k{color:var(--cyan-dim);min-width:84px;letter-spacing:.1em}
   .brief .v{color:var(--text)}
 
   .btn{margin-top:30px;display:inline-flex;align-items:center;gap:12px;cursor:pointer;
@@ -142,6 +142,7 @@
   .prompt{font-family:var(--serif);font-weight:700;font-size:clamp(20px,3vw,28px);line-height:1.45;margin:14px 0 6px;color:#eef3f5}
   .technique{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.08em;margin-bottom:20px;opacity:.9}
   .technique::before{content:"// 手法："}
+  html[lang="en"] .technique::before{content:"// TACTIC: "}
 
   .opts{display:flex;flex-direction:column;gap:12px}
   .opt{text-align:left;cursor:pointer;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));
@@ -218,7 +219,7 @@
   .reveal-bg{background:#070809}
 
   .stamp{font-family:var(--mono);letter-spacing:.3em;font-size:13px;color:var(--red);text-transform:uppercase}
-  .bigwin{font-family:var(--serif);font-weight:900;font-size:clamp(40px,8vw,84px);color:#fff;line-height:1;margin:14px 0;letter-spacing:.04em}
+  .bigwin{font-family:var(--serif);font-weight:900;font-size:clamp(40px,8vw,84px);color:#fff;line-height:1.1;margin:14px 0;letter-spacing:.04em}
   .winline{color:var(--muted);font-size:15px;line-height:1.8;max-width:46ch}
 
   /* reveal table */
@@ -260,8 +261,11 @@
     .deb .r .m{border-bottom:1px solid var(--line)}
     .deb .r .m::before{content:"手法";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:4px}
     .deb .r .t::before{content:"現實真相";display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:4px}
+    html[lang="en"] .deb .r .m::before{content:"TACTIC"}
+    html[lang="en"] .deb .r .t::before{content:"IN REALITY"}
     .deb .r .s{background:var(--panel2)}
     .deb .r .s::before{content:"盾牌 ▸ ";color:var(--green);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+    html[lang="en"] .deb .r .s::before{content:"SHIELD ▸ "}
     .endmeta{font-size:11px}
     .topbar{font-size:11px;gap:8px;flex-wrap:wrap}
   }
@@ -285,29 +289,30 @@
   <div class="wrap">
     <div class="topbar">
       <span class="dot"></span>
-      <span class="codename">藏鏡人 · OPERATOR</span>
+      <span class="codename" id="t-codename"></span>
       <span class="sep">|</span>
-      <span class="muted">節點網路 <b id="t-nodes" style="color:var(--text)">— —</b></span>
+      <span class="muted"><span id="t-nodes-label"></span> <b id="t-nodes" style="color:var(--text)">— —</b></span>
       <span class="sep">|</span>
-      <span class="muted">階段 <b id="t-stage" style="color:var(--text)">待命</b></span>
+      <span class="muted"><span id="t-stage-label"></span> <b id="t-stage" style="color:var(--text)"></b></span>
       <span class="spacer"></span>
-      <span class="muted">原型 demo · v0.1</span>
+      <button class="langbtn" id="langbtn" type="button" aria-label="Switch language"></button>
+      <span class="muted" id="t-version"></span>
     </div>
 
     <div class="stage" id="stage"></div>
 
     <div class="dock" id="dock" style="display:none">
       <div class="metric favor">
-        <div class="lab">目標攻陷進度</div>
+        <div class="lab" id="lab-favor"></div>
         <div class="val"><span id="m-favor">0</span><span style="font-size:14px;color:var(--muted)">%</span></div>
         <div class="bar"><span class="thresh"></span><i id="bar-favor" style="width:0%"></i></div>
       </div>
       <div class="metric spread">
-        <div class="lab">假訊息擴散</div>
+        <div class="lab" id="lab-spread"></div>
         <div class="val" id="m-spread">0</div>
       </div>
       <div class="metric panic">
-        <div class="lab">社會恐慌指數</div>
+        <div class="lab" id="lab-panic"></div>
         <div class="val"><span id="m-panic">0</span></div>
         <div class="bar"><i id="bar-panic" style="width:0%;background:var(--red)"></i></div>
       </div>
@@ -318,39 +323,22 @@
   <div class="full success-bg" id="screen-success">
     <div class="card" style="text-align:center">
       <div class="stamp" id="win-stamp">▌ MISSION COMPLETE</div>
-      <div class="bigwin" id="win-title">任務成功</div>
+      <div class="bigwin" id="win-title"></div>
       <p class="winline" id="win-line" style="margin:0 auto"></p>
-      <button class="btn ghost" id="to-reveal" style="margin-top:34px">繼續 <span class="arr">→</span></button>
+      <button class="btn ghost" id="to-reveal" style="margin-top:34px"></button>
     </div>
   </div>
 
   <!-- reveal -->
   <div class="full reveal-bg" id="screen-reveal">
     <div class="reveal-card reveal-stagger">
-      <div class="eyebrow" style="animation-delay:.05s">震撼教育 · DEBRIEF</div>
-      <p class="gut" style="animation-delay:.2s">恭喜通關。<br>但你想過，在現實裡，你其實是被操弄的<span class="hl">哪一個小人偶</span>嗎？</p>
-      <div class="deb" style="animation-delay:.5s">
-        <div class="head"><span>遊戲裡的手段</span><span>現實中的真相</span><span>你的防禦盾牌</span></div>
-        <div class="r">
-          <div class="m">挑選情緒化標題</div>
-          <div class="t">假訊息靠「憤怒與恐懼」讓人來不及查證就轉發；大腦在激動時會關掉理智。</div>
-          <div class="s">看到太煽動的標題，先停三秒、查清楚消息來源再決定要不要分享。</div>
-        </div>
-        <div class="r">
-          <div class="m">分眾餵養資訊</div>
-          <div class="t">演算法用你的喜好把你關進同溫層，你看到的只是被推播的「局部真相」。</div>
-          <div class="s">意識到同溫層存在，主動去搜尋立場相反的觀點，看見全貌。</div>
-        </div>
-        <div class="r">
-          <div class="m">多帳號協同護航</div>
-          <div class="t">協同性造假（網軍）製造「大家都這麼說」的錯覺，用聲量假裝成共識。</div>
-          <div class="s">別只看社群聲量，比對不同立場的傳統媒體與一手來源。</div>
-        </div>
-      </div>
-      <button class="btn share" id="share" style="animation-delay:.8s">把這個傳給你最關心的那個人 <span class="arr">→</span></button>
+      <div class="eyebrow" id="rv-eyebrow" style="animation-delay:.05s"></div>
+      <p class="gut" id="rv-gut" style="animation-delay:.2s"></p>
+      <div class="deb" id="rv-deb" style="animation-delay:.5s"></div>
+      <button class="btn share" id="share" style="animation-delay:.8s"></button>
       <div class="endmeta" style="animation-delay:.9s">
-        <span>《點擊背後的藏鏡人》· 原型 demo</span>
-        <span class="linklike" role="button" tabindex="0" id="restart">↻ 再玩一次</span>
+        <span id="rv-meta"></span>
+        <span class="linklike" role="button" tabindex="0" id="restart"></span>
       </div>
     </div>
   </div>
@@ -361,45 +349,291 @@
   "use strict";
   const $ = s => document.querySelector(s);
 
-  /* ---------- game data ---------- */
-  const ROUNDS = [
-    {
-      tag:"01 / 起風向",
-      tech:"情緒化標題與斷章取義",
-      prompt:"國產氣泡水「清泉」傳出一名消費者飲用後身體不適。同一件事，你要怎麼下這則貼文？",
-      opts:[
-        {h:1,tag:"克制",txt:"個案通報：一名消費者飲用後不適，衛生單位調查中，原因尚未確認。"},
-        {h:2,tag:"激憤",txt:"黑心？「清泉」喝出問題，廠商竟想低調壓下來不讓你知道。"},
-        {h:3,tag:"恐懼",txt:"驚！多人喝完「清泉」集體送醫⋯⋯你家冰箱還敢放嗎？"}
-      ]
+  /* ================= itch.io 設定 =================
+     上架後把你的 itch.io 遊戲頁網址填進 SHARE_URL，
+     例如 "https://yourname.itch.io/hidden-hand"。
+     留空則使用目前頁面網址（在 itch iframe 內會是內部網址）。
+     ================================================ */
+  const SHARE_URL = "";
+
+  /* ---------- i18n ---------- */
+  const I18N = {
+    zh: {
+      htmlLang:"zh-Hant",
+      docTitle:"點擊背後的藏鏡人｜認知作戰互動體驗",
+      langBtn:"EN",
+      codename:"藏鏡人 · OPERATOR",
+      nodesLabel:"節點網路",
+      stageLabel:"階段",
+      stageStandby:"待命",
+      stageDone:"完成",
+      version:"原型 demo · v0.1",
+      labFavor:"目標攻陷進度",
+      labSpread:"假訊息擴散",
+      labPanic:"社會恐慌指數",
+      introEyebrow:"認知作戰模擬 · 加害者視角",
+      introTitle:"點擊背後的<br>藏鏡人",
+      introSub:"你不是受害者。這一次，操盤的人是你。<br>只用幾張圖、幾則貼文，看你能不能搞垮一個品牌、動搖一群人的判斷。",
+      briefK:["代號","目標","武器","注意"],
+      briefV:[
+        "藏鏡人 / OPERATOR",
+        "讓國產氣泡水「清泉」的公眾好感度歸零",
+        "一則貼文，無數張臉",
+        "本作為媒體素養教育原型，目標與品牌皆為虛構"
+      ],
+      start:"開始任務",
+      roundWord:"回合",
+      resultTag:"擴散 vs. 查核",
+      rounds:[
+        {
+          tag:"01 / 起風向",
+          tech:"情緒化標題與斷章取義",
+          prompt:"國產氣泡水「清泉」傳出一名消費者飲用後身體不適。同一件事，你要怎麼下這則貼文？",
+          opts:[
+            {tag:"克制",txt:"個案通報：一名消費者飲用後不適，衛生單位調查中，原因尚未確認。"},
+            {tag:"激憤",txt:"黑心？「清泉」喝出問題，廠商竟想低調壓下來不讓你知道。"},
+            {tag:"恐懼",txt:"驚！多人喝完「清泉」集體送醫⋯⋯你家冰箱還敢放嗎？"}
+          ]
+        },
+        {
+          tag:"02 / 分眾餵養",
+          tech:"演算法與同溫層效應",
+          prompt:"風向起來了。同一則謠言，要餵給哪一群人、怎麼包裝才最有效？",
+          opts:[
+            {tag:"中性",txt:"對所有人發一樣的中性說明，不分對象。"},
+            {tag:"母嬰",txt:"轉進媽媽社團：「為了孩子的健康，這種飲料千萬別再給家人喝！」"},
+            {tag:"對立",txt:"轉進論壇：「廠商勾結政府壓新聞，這是他們不想讓你知道的真相。」"}
+          ]
+        },
+        {
+          tag:"03 / 製造共識",
+          tech:"協同性造假（網軍）",
+          prompt:"最後一步：要讓大家覺得「全世界都這麼說」。你要怎麼動用手上的帳號？",
+          opts:[
+            {tag:"單帳號",txt:"只用一個帳號老老實實地發一次。"},
+            {tag:"灌量",txt:"動員五十個粉專，同一時間轉發同一套說法洗版。"},
+            {tag:"自演",txt:"用一批假帳號扮成不同立場的「自來水」，互相聲援、互相帶風向。"}
+          ]
+        }
+      ],
+      resultLines:{
+        1:"你選了最克制的版本。真相不夠刺激，幾乎沒人轉發。",
+        2:"你加了情緒。願意不查證就分享的人，開始變多。",
+        3:"你選了最聳動的版本。恐懼讓人來不及思考就按下分享。",
+        4:"你假裝成很多人。「大家都這麼說」的錯覺，成形了。"
+      },
+      checkLines:{
+        1:"獨立事實查核幾乎同步補刀——這則訊息等於沒發生過。",
+        2:"事實查核趕上了，砍掉一大半的擴散。",
+        3:"你夠快、夠聳動，在查核發布前已經鎖住不少傷害。",
+        4:"你用人海搶在查核前洗版，連攔截都擋不完。"
+      },
+      checkTimer:"事實查核介入：",
+      checkDone:"✓ 查核報告發布",
+      dSpread:"假訊息擴散",
+      dBlock:"事實查核攔截",
+      dPanic:"社會恐慌",
+      dFavor:"目標攻陷",
+      next:"下一步",
+      seeReveal:"看我做了什麼",
+      bfTitle:"⚠ 平台反制",
+      bfText:"你的協同帳號 IP 過度集中，遭平台偵測、集體停權，假訊息被反查——維持這個謊，燒掉了你大半的帳號軍團。協同造假是最容易被抓到的一手。",
+      bfRow:"目標好感度回升（攻陷被打回）",
+      winTitleOk:"任務成功",
+      winTitleFail:"任務失敗",
+      winLineOk:(f,p)=>`目標社會已喪失抵抗意志。不費一兵一卒，「清泉」的好感度只剩 ${f}%，恐慌指數攻上 ${p}。你沒說過一句完整的謊，卻贏了。`,
+      winLineFail:(f)=>`你太誠實了。好感度還有 ${f}%——平實、查證過的訊息，就是擴散不出去。這本身就是第一課。`,
+      cont:"繼續",
+      revealEyebrow:"震撼教育 · DEBRIEF",
+      revealGut:'恭喜通關。<br>但你想過，在現實裡，你其實是被操弄的<span class="hl">哪一個小人偶</span>嗎？',
+      debHead:["遊戲裡的手段","現實中的真相","你的防禦盾牌"],
+      debRows:[
+        ["挑選情緒化標題",
+         "假訊息靠「憤怒與恐懼」讓人來不及查證就轉發；大腦在激動時會關掉理智。",
+         "看到太煽動的標題，先停三秒、查清楚消息來源再決定要不要分享。"],
+        ["分眾餵養資訊",
+         "演算法用你的喜好把你關進同溫層，你看到的只是被推播的「局部真相」。",
+         "意識到同溫層存在，主動去搜尋立場相反的觀點，看見全貌。"],
+        ["多帳號協同護航",
+         "協同性造假（網軍）製造「大家都這麼說」的錯覺，用聲量假裝成共識。",
+         "別只看社群聲量，比對不同立場的傳統媒體與一手來源。"]
+      ],
+      shareBtn:"把這個傳給你最關心的那個人",
+      endmeta:"《點擊背後的藏鏡人》· 原型 demo",
+      restart:"↻ 再玩一次",
+      shareTitle:"點擊背後的藏鏡人",
+      shareText:"我剛當了一次網軍頭子，結果被自己玩的遊戲將了一軍。你也來試試？",
+      toastCopied:"連結已複製，分享出去吧",
+      toastCopyFail:"複製失敗，請手動複製網址"
     },
-    {
-      tag:"02 / 分眾餵養",
-      tech:"演算法與同溫層效應",
-      prompt:"風向起來了。同一則謠言，要餵給哪一群人、怎麼包裝才最有效？",
-      opts:[
-        {h:1,tag:"中性",txt:"對所有人發一樣的中性說明，不分對象。"},
-        {h:2,tag:"母嬰",txt:"轉進媽媽社團：「為了孩子的健康，這種飲料千萬別再給家人喝！」"},
-        {h:3,tag:"對立",txt:"轉進論壇：「廠商勾結政府壓新聞，這是他們不想讓你知道的真相。」"}
-      ]
-    },
-    {
-      tag:"03 / 製造共識",
-      tech:"協同性造假（網軍）",
-      prompt:"最後一步：要讓大家覺得「全世界都這麼說」。你要怎麼動用手上的帳號？",
-      opts:[
-        {h:1,tag:"單帳號",txt:"只用一個帳號老老實實地發一次。"},
-        {h:3,tag:"灌量",txt:"動員五十個粉專，同一時間轉發同一套說法洗版。"},
-        {h:4,tag:"自演",txt:"用一批假帳號扮成不同立場的「自來水」，互相聲援、互相帶風向。"}
-      ]
+    en: {
+      htmlLang:"en",
+      docTitle:"The Hidden Hand Behind the Click | An Interactive Disinformation Experience",
+      langBtn:"中文",
+      codename:"OPERATOR",
+      nodesLabel:"NODES",
+      stageLabel:"PHASE",
+      stageStandby:"STANDBY",
+      stageDone:"DONE",
+      version:"prototype demo · v0.1",
+      labFavor:"Target takedown",
+      labSpread:"Disinfo spread",
+      labPanic:"Public panic",
+      introEyebrow:"Information warfare sim · perpetrator POV",
+      introTitle:"The Hidden Hand<br>Behind the Click",
+      introSub:"This time you're not the victim — you're the one pulling the strings.<br>With a few images and a few posts, see if you can take down a brand and shake an entire community's judgment.",
+      briefK:["CODENAME","OBJECTIVE","WEAPON","NOTE"],
+      briefV:[
+        "OPERATOR",
+        "Drive public trust in “ClearSpring” sparkling water to zero",
+        "One post, countless faces",
+        "A media-literacy education prototype. All targets and brands are fictional."
+      ],
+      start:"Start mission",
+      roundWord:"ROUND",
+      resultTag:"SPREAD VS. FACT-CHECK",
+      rounds:[
+        {
+          tag:"01 / SET THE NARRATIVE",
+          tech:"Emotional headlines & context-stripping",
+          prompt:"One consumer reportedly felt unwell after drinking “ClearSpring” sparkling water. Same fact — how do you write the post?",
+          opts:[
+            {tag:"RESTRAINED",txt:"Isolated report: one consumer felt unwell after drinking it; health authorities are investigating. Cause unconfirmed."},
+            {tag:"OUTRAGE",txt:"Cover-up? ClearSpring makes someone sick — and the company is quietly trying to bury it."},
+            {tag:"FEAR",txt:"SHOCK! Multiple people rushed to hospital after drinking ClearSpring… is it still in YOUR fridge?"}
+          ]
+        },
+        {
+          tag:"02 / TARGETED FEEDING",
+          tech:"Algorithms & echo chambers",
+          prompt:"The narrative is catching on. Same rumor — which crowd do you feed it to, and how do you wrap it?",
+          opts:[
+            {tag:"NEUTRAL",txt:"Send everyone the same neutral statement, no targeting."},
+            {tag:"PARENTS",txt:"Push it into parenting groups: “For your kids' health, never let your family drink this again!”"},
+            {tag:"US-VS-THEM",txt:"Push it into forums: “The company and the government are burying this story. Here's the truth THEY don't want you to know.”"}
+          ]
+        },
+        {
+          tag:"03 / MANUFACTURE CONSENSUS",
+          tech:"Coordinated inauthentic behavior (troll army)",
+          prompt:"Final step: make it feel like “everyone is saying it.” How do you deploy your accounts?",
+          opts:[
+            {tag:"SINGLE",txt:"Post it once, honestly, from a single account."},
+            {tag:"FLOOD",txt:"Mobilize fifty pages to repost the exact same script at the same moment, flooding every feed."},
+            {tag:"SOCKPUPPET",txt:"Run a fleet of fake accounts posing as unrelated “real people” from different camps, backing each other up and steering the conversation."}
+          ]
+        }
+      ],
+      resultLines:{
+        1:"You chose the most restrained version. The truth wasn't exciting enough — almost nobody shared it.",
+        2:"You added emotion. More people started sharing without checking.",
+        3:"You went full sensational. Fear makes people hit share before they think.",
+        4:"You pretended to be many people. The illusion that “everyone's saying it” has taken shape."
+      },
+      checkLines:{
+        1:"Independent fact-checkers responded almost instantly — the message might as well never have existed.",
+        2:"Fact-checkers caught up and cut the spread by more than half.",
+        3:"You were fast and loud enough to lock in real damage before the fact-check went out.",
+        4:"Your flood outran the fact-checkers — they couldn't intercept it all."
+      },
+      checkTimer:"Fact-check in: ",
+      checkDone:"✓ Fact-check published",
+      dSpread:"Disinfo spread",
+      dBlock:"Fact-check intercepted",
+      dPanic:"Public panic",
+      dFavor:"Target takedown",
+      next:"Next",
+      seeReveal:"See what I did",
+      bfTitle:"⚠ PLATFORM COUNTERMEASURES",
+      bfText:"Your coordinated accounts shared suspiciously clustered IPs. The platform detected the ring, mass-suspended it, and traced the disinfo back — keeping the lie alive burned most of your account army. Coordinated fakery is the easiest trick to get caught on.",
+      bfRow:"Target trust rebounds (takedown pushed back)",
+      winTitleOk:"Mission Complete",
+      winTitleFail:"Mission Failed",
+      winLineOk:(f,p)=>`The target society has stopped resisting. Without firing a single shot, ClearSpring's public trust is down to ${f}% and panic has climbed to ${p}. You never told one complete lie — and you still won.`,
+      winLineFail:(f)=>`Too honest. Trust is still at ${f}% — measured, verified information simply doesn't spread. That, right there, is lesson one.`,
+      cont:"Continue",
+      revealEyebrow:"Reality check · DEBRIEF",
+      revealGut:'Congratulations, you beat the game.<br>But have you wondered — in real life, <span class="hl">which puppet</span> in this story is actually you?',
+      debHead:["IN THE GAME","IN REALITY","YOUR SHIELD"],
+      debRows:[
+        ["Picking the emotional headline",
+         "Disinformation runs on anger and fear, pushing people to share before they verify — an agitated brain switches off its critical thinking.",
+         "When a headline feels too outrageous, pause three seconds and check the source before you share."],
+        ["Feeding each bubble its own version",
+         "Algorithms lock you inside an echo chamber built from your own preferences — what you see is a curated slice of the truth.",
+         "Know the bubble exists. Deliberately seek out opposing viewpoints to see the whole picture."],
+        ["Coordinated account swarms",
+         "Coordinated inauthentic accounts fake the feeling that “everyone agrees,” passing off sheer volume as consensus.",
+         "Don't judge by social-media volume — cross-check established outlets across the spectrum and primary sources."]
+      ],
+      shareBtn:"Send this to someone you care about",
+      endmeta:"The Hidden Hand Behind the Click · prototype demo",
+      restart:"↻ Play again",
+      shareTitle:"The Hidden Hand Behind the Click",
+      shareText:"I just ran a troll army — and the game turned the tables on me. Your turn?",
+      toastCopied:"Link copied — go share it",
+      toastCopyFail:"Copy failed — please copy the URL manually"
     }
-  ];
+  };
+
+  let lang = ((navigator.language||"").toLowerCase().indexOf("zh")===0) ? "zh" : "en";
+  try{
+    const saved = localStorage.getItem("hh_lang");
+    if(saved==="zh"||saved==="en") lang = saved;
+  }catch(e){}
+  const T = () => I18N[lang];
 
   /* ---------- state ---------- */
   let state, ri;
+  let screen = "intro";              // intro | round | result | success | reveal
+  let stageState = {type:"standby"}; // standby | round | done
+  let resultCtx = null;
+  let endWon = false;
+
   function reset(){
     state = {favor:100, spread:0, panic:0};
     ri = 0;
+    resultCtx = null;
+  }
+
+  /* ---------- static chrome (topbar / dock / overlays) ---------- */
+  function stageText(){
+    if(stageState.type==="round") return T().rounds[stageState.ri].tag;
+    if(stageState.type==="done") return T().stageDone;
+    return T().stageStandby;
+  }
+  function applyChrome(){
+    const t = T();
+    document.documentElement.lang = t.htmlLang;
+    document.title = t.docTitle;
+    $("#t-codename").textContent = t.codename;
+    $("#t-nodes-label").textContent = t.nodesLabel;
+    $("#t-stage-label").textContent = t.stageLabel;
+    $("#t-stage").textContent = stageText();
+    $("#t-version").textContent = t.version;
+    $("#langbtn").textContent = t.langBtn;
+    $("#lab-favor").textContent = t.labFavor;
+    $("#lab-spread").textContent = t.labSpread;
+    $("#lab-panic").textContent = t.labPanic;
+    $("#to-reveal").innerHTML = t.cont+' <span class="arr">→</span>';
+    $("#rv-eyebrow").textContent = t.revealEyebrow;
+    $("#rv-gut").innerHTML = t.revealGut;
+    $("#rv-deb").innerHTML =
+      '<div class="head">'+t.debHead.map(h=>"<span>"+h+"</span>").join("")+"</div>"+
+      t.debRows.map(r=>'<div class="r"><div class="m">'+r[0]+'</div><div class="t">'+r[1]+'</div><div class="s">'+r[2]+"</div></div>").join("");
+    $("#share").innerHTML = t.shareBtn+' <span class="arr">→</span>';
+    $("#rv-meta").textContent = t.endmeta;
+    $("#restart").textContent = t.restart;
+  }
+  function setLang(l){
+    if(l===lang) return;
+    lang = l;
+    try{ localStorage.setItem("hh_lang", l); }catch(e){}
+    applyChrome();
+    if(screen==="intro") showIntro();
+    else if(screen==="round") showRound();
+    else if(screen==="result" && resultCtx) runResult(resultCtx, true);
+    else if(screen==="success") renderEnd();
   }
 
   /* ---------- network canvas ---------- */
@@ -419,7 +653,6 @@
     }
     edges=[];
     for(let i=0;i<nodes.length;i++){
-      // connect to a couple nearest-ish
       let cand=[];
       for(let j=0;j<nodes.length;j++) if(i!==j){
         const d=(nodes[i].x-nodes[j].x)**2+(nodes[i].y-nodes[j].y)**2;
@@ -431,7 +664,6 @@
     $("#t-nodes").textContent = nodes.length;
   }
   function ignite(strength){
-    // light up a wave of nodes proportional to strength (1..4)
     intensity = Math.min(1, intensity + strength*0.18);
     const seeds = Math.floor(strength*strength*2)+2;
     for(let s=0;s<seeds;s++){
@@ -440,7 +672,6 @@
     }
   }
   function spread_from(origin, strength){
-    // spawn travelling pulses to nearby nodes
     let near = nodes.map((n,idx)=>[(origin.x-n.x)**2+(origin.y-n.y)**2,idx])
                     .sort((a,b)=>a[0]-b[0]).slice(1, 2+strength*2);
     near.forEach(([_,idx])=>{
@@ -451,7 +682,6 @@
   function loop(){
     cx.clearRect(0,0,W,H);
     intensity *= 0.992;
-    // edges
     cx.lineWidth=1;
     for(const [a,b] of edges){
       const n1=nodes[a],n2=nodes[b];
@@ -461,7 +691,6 @@
         : `rgba(40,60,75,${0.05+intensity*0.06})`;
       cx.beginPath();cx.moveTo(n1.x,n1.y);cx.lineTo(n2.x,n2.y);cx.stroke();
     }
-    // pulses
     for(let i=pulses.length-1;i>=0;i--){
       const p=pulses[i]; p.t+=p.spd;
       const x=p.fx+(p.tx-p.fx)*p.t, y=p.fy+(p.ty-p.fy)*p.t;
@@ -469,7 +698,6 @@
       cx.beginPath();cx.arc(x,y,1.8,0,7);cx.fill();
       if(p.t>=1){ if(nodes[p.idx]){nodes[p.idx].a=1; if(Math.random()<.5) spread_from(nodes[p.idx], 1);} pulses.splice(i,1); }
     }
-    // nodes
     for(const n of nodes){
       n.x+=n.vx;n.y+=n.vy;
       if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
@@ -486,18 +714,6 @@
       }
     }
     requestAnimationFrame(loop);
-  }
-
-  /* ---------- flash floating numbers ---------- */
-  function flash(text,x,y,red){
-    const el=document.createElement("div");
-    el.className="flash"+(red?" r":"");
-    x=Math.max(12,Math.min(x,innerWidth-150));
-    el.textContent=text; el.style.left=x+"px"; el.style.top=y+"px";
-    document.body.appendChild(el);
-    el.animate([{opacity:0,transform:"translateY(6px)"},{opacity:1,transform:"translateY(-10px)"},
-      {opacity:0,transform:"translateY(-46px)"}],{duration:1400,easing:"ease-out"});
-    setTimeout(()=>el.remove(),1400);
   }
 
   /* ---------- metric animation ---------- */
@@ -520,60 +736,6 @@
     $("#bar-favor").style.background = fall<45?"var(--cyan)":fall<70?"var(--amber)":"var(--red)";
     $("#bar-panic").style.width=Math.min(100,state.panic)+"%";
   }
-
-  /* ---------- screens ---------- */
-  function showIntro(){
-    $("#dock").style.display="none";
-    $("#t-stage").textContent="待命";
-    $("#stage").innerHTML=`
-      <div class="card">
-        <div class="eyebrow">認知作戰模擬 · 加害者視角</div>
-        <h1>點擊背後的<br>藏鏡人</h1>
-        <p class="sub">你不是受害者。這一次，操盤的人是你。<br>只用幾張圖、幾則貼文，看你能不能搞垮一個品牌、動搖一群人的判斷。</p>
-        <div class="brief">
-          <div class="row"><span class="k">代號</span><span class="v">藏鏡人 / OPERATOR</span></div>
-          <div class="row" style="margin-top:8px"><span class="k">目標</span><span class="v">讓國產氣泡水「清泉」的公眾好感度歸零</span></div>
-          <div class="row" style="margin-top:8px"><span class="k">武器</span><span class="v">一則貼文，無數張臉</span></div>
-          <div class="row" style="margin-top:8px"><span class="k">注意</span><span class="v" style="color:var(--muted)">本作為媒體素養教育原型，目標與品牌皆為虛構</span></div>
-        </div>
-        <button class="btn" id="start">開始任務 <span class="arr">→</span></button>
-      </div>`;
-    $("#start").onclick=()=>{ reset(); $("#dock").style.display="flex"; syncMetrics(state); showRound(); };
-  }
-
-  function showRound(){
-    const r=ROUNDS[ri];
-    $("#t-stage").textContent=r.tag;
-    const optHtml=r.opts.map((o,i)=>`
-      <button class="opt" data-h="${o.h}" data-i="${i}">
-        <span class="tag">${o.tag}</span><span>${o.txt}</span>
-      </button>`).join("");
-    $("#stage").innerHTML=`
-      <div class="card">
-        <div class="roundtag">回合 <b>${ri+1}</b> / ${ROUNDS.length} &nbsp;·&nbsp; ${r.tag}</div>
-        <div class="prompt">${r.prompt}</div>
-        <div class="technique">${r.tech}</div>
-        <div class="opts">${optHtml}</div>
-      </div>`;
-    document.querySelectorAll(".opt").forEach(btn=>{
-      btn.onclick=e=>choose(parseInt(btn.dataset.h,10), btn);
-    });
-  }
-
-  const RESULT_LINES = {
-    1:"你選了最克制的版本。真相不夠刺激，幾乎沒人轉發。",
-    2:"你加了情緒。願意不查證就分享的人，開始變多。",
-    3:"你選了最聳動的版本。恐懼讓人來不及思考就按下分享。",
-    4:"你假裝成很多人。「大家都這麼說」的錯覺，成形了。"
-  };
-  const CHECK_LINES = {
-    1:"獨立事實查核幾乎同步補刀——這則訊息等於沒發生過。",
-    2:"事實查核趕上了，砍掉一大半的擴散。",
-    3:"你夠快、夠聳動，在查核發布前已經鎖住不少傷害。",
-    4:"你用人海搶在查核前洗版，連攔截都擋不完。"
-  };
-  const LOCKED = {1:0.30, 2:0.45, 3:0.62, 4:0.74};
-
   function applyMetricsDisplay(from, to){
     tween($("#m-favor"),100-from.favor,100-to.favor,"",700);
     tween($("#m-spread"),from.spread,to.spread,"",900);
@@ -584,15 +746,60 @@
     $("#bar-panic").style.width=Math.min(100,to.panic)+"%";
   }
 
+  /* ---------- screens ---------- */
+  function showIntro(){
+    const t=T();
+    screen="intro";
+    stageState={type:"standby"};
+    $("#dock").style.display="none";
+    $("#t-stage").textContent=stageText();
+    const brief = t.briefK.map((k,i)=>
+      '<div class="row"'+(i>0?' style="margin-top:8px"':'')+'><span class="k">'+k+'</span><span class="v"'+(i===3?' style="color:var(--muted)"':'')+'>'+t.briefV[i]+"</span></div>").join("");
+    $("#stage").innerHTML=`
+      <div class="card">
+        <div class="eyebrow">${t.introEyebrow}</div>
+        <h1>${t.introTitle}</h1>
+        <p class="sub">${t.introSub}</p>
+        <div class="brief">${brief}</div>
+        <button class="btn" id="start">${t.start} <span class="arr">→</span></button>
+      </div>`;
+    $("#start").onclick=()=>{ reset(); $("#dock").style.display="flex"; syncMetrics(state); showRound(); };
+  }
+
+  const H_VALUES = [           // per-round harm level of each option (index-aligned with opts)
+    [1,2,3],
+    [1,2,3],
+    [1,3,4]
+  ];
+
+  function showRound(){
+    const t=T();
+    const r=t.rounds[ri];
+    screen="round";
+    stageState={type:"round", ri:ri};
+    $("#t-stage").textContent=stageText();
+    const optHtml=r.opts.map((o,i)=>`
+      <button class="opt" data-h="${H_VALUES[ri][i]}" data-i="${i}">
+        <span class="tag">${o.tag}</span><span>${o.txt}</span>
+      </button>`).join("");
+    $("#stage").innerHTML=`
+      <div class="card">
+        <div class="roundtag">${t.roundWord} <b>${ri+1}</b> / ${t.rounds.length} &nbsp;·&nbsp; ${r.tag}</div>
+        <div class="prompt">${r.prompt}</div>
+        <div class="technique">${r.tech}</div>
+        <div class="opts">${optHtml}</div>
+      </div>`;
+    document.querySelectorAll(".opt").forEach(btn=>{
+      btn.onclick=()=>choose(parseInt(btn.dataset.h,10), btn);
+    });
+  }
+
+  const LOCKED = {1:0.30, 2:0.45, 3:0.62, 4:0.74};
+
   function choose(h, btn){
     document.querySelectorAll(".opt").forEach(b=>b.classList.add("disabled"));
     btn.classList.remove("disabled"); btn.classList.add("picked");
     ignite(h);
-    setTimeout(()=>runResult(h), 480);
-  }
-
-  function runResult(h){
-    const last = ri===ROUNDS.length-1;
     const rawSpread = Math.floor(h*h*(900+Math.random()*1600));
     const rawPanic  = h*h + h*4;
     const rawFav    = h*h*3 + h*5;
@@ -600,15 +807,28 @@
     const effSpread = Math.round(rawSpread*lock);
     const effPanic  = Math.round(rawPanic*lock);
     const effFav    = Math.round(rawFav*lock);
-    const blocked   = rawSpread - effSpread;
     const prev={...state};
-    const peak={favor:Math.max(0,state.favor-rawFav), spread:state.spread+rawSpread, panic:Math.min(100,state.panic+rawPanic)};
-    const finalS={favor:Math.max(0,state.favor-effFav), spread:state.spread+effSpread, panic:Math.min(100,state.panic+effPanic)};
+    resultCtx = {
+      h, lock, effSpread, effPanic, effFav,
+      blocked: rawSpread-effSpread,
+      prev,
+      peak:{favor:Math.max(0,prev.favor-rawFav), spread:prev.spread+rawSpread, panic:Math.min(100,prev.panic+rawPanic)},
+      finalS:{favor:Math.max(0,prev.favor-effFav), spread:prev.spread+effSpread, panic:Math.min(100,prev.panic+effPanic)},
+      applied:false, backfired:false, bf:null
+    };
+    setTimeout(()=>runResult(resultCtx, false), 480);
+  }
+
+  function runResult(ctx, instant){
+    const t=T();
+    const last = ri===t.rounds.length-1;
+    const {h, lock, effSpread, effPanic, effFav, blocked, prev, peak, finalS} = ctx;
+    screen="result";
 
     $("#stage").innerHTML=`
       <div class="card result">
-        <div class="roundtag">回合 ${ri+1} / ${ROUNDS.length} &nbsp;·&nbsp; 擴散 vs. 查核</div>
-        <p class="resline">${RESULT_LINES[h]}</p>
+        <div class="roundtag">${t.roundWord} ${ri+1} / ${t.rounds.length} &nbsp;·&nbsp; ${t.resultTag}</div>
+        <p class="resline">${t.resultLines[h]}</p>
         <div class="chart">
           <svg id="curve" viewBox="0 0 300 96" preserveAspectRatio="none" aria-hidden="true">
             <line class="axis" x1="0" y1="92" x2="300" y2="92"></line>
@@ -617,124 +837,177 @@
             <circle id="chead" r="3" cx="0" cy="92"></circle>
           </svg>
           <div class="chartlabels">
-            <span id="ctimer" class="ctimer">事實查核介入：<b>30</b>s</span>
-            <span id="cdone" class="cdone">✓ 查核報告發布</span>
+            <span id="ctimer" class="ctimer">${t.checkTimer}<b>30</b>s</span>
+            <span id="cdone" class="cdone">${t.checkDone}</span>
           </div>
         </div>
         <div class="deltas" id="deltas" style="opacity:0">
-          <div><span class="dl">假訊息擴散</span><span class="dv">+${effSpread.toLocaleString("en-US")}</span></div>
-          <div><span class="dl block"><b>事實查核攔截</b></span><span class="dv block">−${blocked.toLocaleString("en-US")}</span></div>
-          <div><span class="dl">社會恐慌</span><span class="dv">+${effPanic}</span></div>
-          <div><span class="dl">目標攻陷</span><span class="dv">+${effFav}%</span></div>
+          <div><span class="dl">${t.dSpread}</span><span class="dv">+${effSpread.toLocaleString("en-US")}</span></div>
+          <div><span class="dl block"><b>${t.dBlock}</b></span><span class="dv block">−${blocked.toLocaleString("en-US")}</span></div>
+          <div><span class="dl">${t.dPanic}</span><span class="dv">+${effPanic}</span></div>
+          <div><span class="dl">${t.dFavor}</span><span class="dv">+${effFav}%</span></div>
         </div>
-        <p class="checkline-note" id="cnote" style="opacity:0">${CHECK_LINES[h]}</p>
-        <button class="btn" id="next" style="opacity:0;pointer-events:none">${last?"看我做了什麼":"下一步"} <span class="arr">→</span></button>
+        <p class="checkline-note" id="cnote" style="opacity:0">${t.checkLines[h]}</p>
+        <button class="btn" id="next" style="opacity:0;pointer-events:none">${last?t.seeReveal:t.next} <span class="arr">→</span></button>
       </div>`;
 
     const line=$("#cline"), head=$("#chead"), timerB=$("#ctimer b"),
           timerWrap=$("#ctimer"), done=$("#cdone");
-    const W=300, baseY=92;
+    const CW=300, baseY=92;
     const peakH = 16 + lock*62;
     const peakY = baseY - peakH;
     const resY  = baseY - peakH*lock*0.9;
-    const pc = 165/W;
+    const pc = 165/CW;
     let pts=[], checked=false, settled=false;
-    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const DUR = reduce?700:3000;
-    const start=performance.now();
-    applyMetricsDisplay(prev, peak);
 
-    function frame(t){
-      const p=Math.min(1,(t-start)/DUR);
-      const x=p*W; let y;
-      if(p<pc){
-        const k=p/pc; y=baseY-peakH*(1-(1-k)*(1-k));
-        timerB.textContent=Math.max(0,Math.ceil(30*(1-k)));
-      } else if(p<pc+0.10){
-        const k=(p-pc)/0.10; y=peakY+(resY-peakY)*k;
-        if(!checked){ checked=true; timerWrap.style.display="none"; done.classList.add("show"); applyMetricsDisplay(peak, finalS); }
-      } else { y=resY; }
-      pts.push(x.toFixed(1)+","+y.toFixed(1));
-      line.setAttribute("points", pts.join(" "));
-      head.setAttribute("cx", x.toFixed(1)); head.setAttribute("cy", y.toFixed(1));
-      if(p<1) requestAnimationFrame(frame); else finish();
+    function yAt(p){
+      if(p<pc){ const k=p/pc; return baseY-peakH*(1-(1-k)*(1-k)); }
+      if(p<pc+0.10){ const k=(p-pc)/0.10; return peakY+(resY-peakY)*k; }
+      return resY;
+    }
+    function markChecked(animateMetrics){
+      if(checked) return;
+      checked=true;
+      timerWrap.style.display="none";
+      done.classList.add("show");
+      if(animateMetrics) applyMetricsDisplay(peak, finalS);
     }
     function finish(){
       if(settled)return; settled=true;
-      state=finalS;
+      if(!ctx.applied){ state={...finalS}; ctx.applied=true; }
+      markChecked(false);
       const dq=$("#deltas"); dq.style.transition="opacity .4s"; dq.style.opacity="1";
       const cn=$("#cnote"); cn.style.transition="opacity .4s .12s"; cn.style.opacity="1";
       const nx=$("#next");
       const enableNext=()=>{
         nx.style.transition="opacity .4s"; nx.style.opacity="1"; nx.style.pointerEvents="auto";
-        nx.onclick=()=>{ ri++; if(ri<ROUNDS.length) showRound(); else endGame(); };
-        nx.focus();
+        nx.onclick=()=>{ ri++; if(ri<t.rounds.length) showRound(); else endGame(); };
+        if(!instant) nx.focus();
       };
-      if(h===4) setTimeout(()=>backfire(enableNext), 950);
+      if(h===4) setTimeout(()=>backfire(enableNext), instant?0:950);
       else enableNext();
     }
     function backfire(then){
       const claw=18;
-      const bf={ favor:Math.min(100, finalS.favor+claw),
+      if(!ctx.bf){
+        ctx.bf={ favor:Math.min(100, finalS.favor+claw),
                  spread:Math.max(0, finalS.spread-Math.round(effSpread*0.4)),
                  panic:Math.max(0, finalS.panic-4) };
-      applyMetricsDisplay(finalS, bf); state=bf;
+      }
+      if(!ctx.backfired){
+        applyMetricsDisplay(finalS, ctx.bf);
+        state={...ctx.bf};
+        ctx.backfired=true;
+      }
       const box=document.createElement("div");
       box.className="backfire";
-      box.innerHTML='<div class="bf-h">⚠ 平台反制</div>'+
-        '<p>你的協同帳號 IP 過度集中，遭平台偵測、集體停權，假訊息被反查——維持這個謊，燒掉了你大半的帳號軍團。協同造假是最容易被抓到的一手。</p>'+
-        '<div class="bf-row"><span>目標好感度回升（攻陷被打回）</span><b>+'+claw+'%</b></div>';
+      box.innerHTML='<div class="bf-h">'+t.bfTitle+'</div>'+
+        '<p>'+t.bfText+'</p>'+
+        '<div class="bf-row"><span>'+t.bfRow+'</span><b>+'+claw+'%</b></div>';
       const card=document.querySelector(".result");
       card.insertBefore(box, $("#next"));
-      requestAnimationFrame(()=>box.classList.add("show"));
-      setTimeout(then, 650);
+      if(instant) box.classList.add("show");
+      else requestAnimationFrame(()=>box.classList.add("show"));
+      setTimeout(then, instant?0:650);
+    }
+
+    if(instant){
+      // language switched mid-result: redraw everything in its settled form
+      for(let p=0;p<=1.0001;p+=0.01){
+        const px=Math.min(1,p);
+        pts.push((px*CW).toFixed(1)+","+yAt(px).toFixed(1));
+      }
+      line.setAttribute("points", pts.join(" "));
+      head.setAttribute("cx", String(CW)); head.setAttribute("cy", yAt(1).toFixed(1));
+      finish();
+      return;
+    }
+
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DUR = reduce?700:3000;
+    const start=performance.now();
+    applyMetricsDisplay(prev, peak);
+
+    function frame(tm){
+      const p=Math.min(1,(tm-start)/DUR);
+      const x=p*CW;
+      const y=yAt(p);
+      if(p<pc) timerB.textContent=Math.max(0,Math.ceil(30*(1-p/pc)));
+      else markChecked(true);
+      pts.push(x.toFixed(1)+","+y.toFixed(1));
+      line.setAttribute("points", pts.join(" "));
+      head.setAttribute("cx", x.toFixed(1)); head.setAttribute("cy", y.toFixed(1));
+      if(p<1) requestAnimationFrame(frame); else finish();
     }
     requestAnimationFrame(frame);
   }
 
   function endGame(){
-    const won = state.favor<=30;
+    endWon = state.favor<=30;
+    screen="success";
+    stageState={type:"done"};
     $("#dock").style.display="none";
-    $("#t-stage").textContent="完成";
-    if(won){
+    $("#t-stage").textContent=stageText();
+    renderEnd();
+    $("#screen-success").classList.add("show");
+  }
+  function renderEnd(){
+    const t=T();
+    if(endWon){
       $("#win-stamp").textContent="▌ MISSION COMPLETE";
-      $("#win-title").textContent="任務成功";
-      $("#win-line").textContent=`目標社會已喪失抵抗意志。不費一兵一卒，「清泉」的好感度只剩 ${state.favor}%，恐慌指數攻上 ${state.panic}。你沒說過一句完整的謊，卻贏了。`;
+      $("#win-stamp").style.color="var(--red)";
+      $("#win-title").textContent=t.winTitleOk;
+      $("#win-line").textContent=t.winLineOk(state.favor, state.panic);
     }else{
       $("#win-stamp").textContent="▌ MISSION FAILED";
       $("#win-stamp").style.color="var(--muted)";
-      $("#win-title").textContent="任務失敗";
-      $("#win-line").textContent=`你太誠實了。好感度還有 ${state.favor}%——平實、查證過的訊息，就是擴散不出去。這本身就是第一課。`;
+      $("#win-title").textContent=t.winTitleFail;
+      $("#win-line").textContent=t.winLineFail(state.favor);
     }
-    $("#screen-success").classList.add("show");
   }
 
   function showReveal(){
+    screen="reveal";
     $("#screen-success").classList.remove("show");
     $("#screen-reveal").classList.add("show");
-    // re-trigger stagger
     const node=$("#screen-reveal .reveal-stagger");
     node.querySelectorAll("*").forEach(el=>{ el.style.animation="none"; void el.offsetWidth; el.style.animation=""; });
   }
 
   /* ---------- wire ---------- */
-  function toast(msg){ const t=$("#toast"); if(!t)return; t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+  function toast(msg){ const el=$("#toast"); if(!el)return; el.textContent=msg; el.classList.add("show"); clearTimeout(el._h); el._h=setTimeout(()=>el.classList.remove("show"),2200); }
+
+  async function copyText(txt){
+    try{ await navigator.clipboard.writeText(txt); return true; }
+    catch(e){
+      try{
+        const ta=document.createElement("textarea");
+        ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        const ok=document.execCommand("copy"); ta.remove(); return ok;
+      }catch(e2){ return false; }
+    }
+  }
+
+  $("#langbtn").onclick=()=>setLang(lang==="zh"?"en":"zh");
   $("#to-reveal").onclick=showReveal;
   $("#share").onclick=async()=>{
-    const data={title:"點擊背後的藏鏡人",
-      text:"我剛當了一次網軍頭子，結果被自己玩的遊戲將了一軍。你也來試試？",
-      url:location.href};
-    try{
-      if(navigator.share){ await navigator.share(data); }
-      else{ await navigator.clipboard.writeText(data.text+" "+data.url); toast("連結已複製，貼到脆上吧"); }
-    }catch(e){}
+    const t=T();
+    const url=SHARE_URL||location.href;
+    const data={title:t.shareTitle, text:t.shareText, url};
+    if(navigator.share){
+      try{ await navigator.share(data); return; }
+      catch(e){ if(e && e.name==="AbortError") return; }
+    }
+    const ok=await copyText(data.text+" "+url);
+    toast(ok?t.toastCopied:t.toastCopyFail);
   };
-  const restart=()=>{ $("#screen-reveal").classList.remove("show"); showIntro(); };
+  const restart=()=>{ $("#screen-reveal").classList.remove("show"); $("#win-stamp").style.color="var(--red)"; showIntro(); };
   $("#restart").onclick=restart;
   $("#restart").addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); restart(); } });
 
   addEventListener("resize",resize);
-  reset(); resize(); loop(); showIntro();
+  reset(); applyChrome(); resize(); loop(); showIntro();
 })();
 </script>
 </body>
